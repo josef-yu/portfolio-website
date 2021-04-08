@@ -1,0 +1,25 @@
+.under-construction {
+    color:crimson;
+    opacity: 0;
+  }
+  
+.site-word, .under-word, .construction-word{
+    font-size: 3.5em;
+    letter-spacing: 0.5rem;
+}
+  
+.contact-info {
+    font-size: 1em;
+    letter-spacing: 0.2rem;
+    color:silver;
+}
+
+@media (max-width: 768px){
+    .site-word, .under-word, .construction-word{
+        font-size: 1.75em;
+    }
+
+    .contact-info {
+        font-size: 0.75em;
+    }
+}

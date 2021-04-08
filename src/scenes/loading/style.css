@@ -1,0 +1,14 @@
+.loading{
+    padding: 100px;
+    width: 200px;
+    height: 200px;
+  }
+  
+.loading svg path {
+    fill: none;
+}
+  
+.circle {
+    stroke-dasharray: 880 882;
+    stroke-dashoffset: 881;
+}

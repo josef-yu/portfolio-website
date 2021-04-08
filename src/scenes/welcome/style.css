@@ -1,0 +1,37 @@
+.welcome {
+    display: flex;
+  }
+  
+.welcome-logo {
+    opacity: 0;
+    height: 200px;
+}
+
+.welcome-text {
+    color: white;
+    font-size: 3.5em;
+    letter-spacing: 1vh;
+}
+
+.letter {
+    display:inline-block;
+    font-size: 1em;
+    opacity: 0;
+}
+
+@media (max-width: 768px) {
+    .welcome-text {
+        font-size: 1.75em;
+    }
+    
+    .welcome-logo {
+        height: 100px;
+    }
+}
+
+@media (max-width: 425px) {
+    .welcome-logo {
+        height: 75px;
+    }
+}
+  
