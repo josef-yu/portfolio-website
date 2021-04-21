@@ -1,5 +1,6 @@
 .welcome {
     display: flex;
+    pointer-events: none;
   }
   
 .welcome-logo {

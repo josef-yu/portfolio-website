@@ -1,8 +1,7 @@
 import React from 'react';
 import './App.css';
 
-import {Loading} from './scenes';
-import { Main } from './scenes';
+import { Loading, Main } from './scenes';
 
 function App() {
   const [isLoaded, setIsLoaded] = React.useState(false);

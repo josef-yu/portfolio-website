@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import anime, { AnimeTimelineInstance } from 'animejs';
 import {SplitText} from '../../components'
 
 import logo from '../../assets/images/brand-logo-min.svg';
 
-export const Welcome = () => {
+interface WelcomeProps {
+    setAnimationFinished: Dispatch<SetStateAction<boolean>>;
+}
+
+export const Welcome = ({setAnimationFinished}: WelcomeProps) => {
     const AnimationRef = React.useRef<AnimeTimelineInstance>();
+    const [imgSrc] = React.useState(logo);
+
     React.useEffect(() => {
 
         AnimationRef.current = anime.timeline({
@@ -28,12 +34,15 @@ export const Welcome = () => {
             targets: '.welcome',
             opacity: [1, 0],
             duration: 1000,
+            complete: function() {
+                setAnimationFinished(true);
+            },
         }, 2000)
-    }, []);
+    }, [setAnimationFinished]);
 
     return(
         <div className="welcome" >
-            <img src={logo} className="welcome-logo" alt="logo"/>
+            <img src={imgSrc} className="welcome-logo" alt="logo"/>
             <h1 className='welcome-text'>
                 <SplitText text="WELCOME" className="letter"/>
             </h1>
