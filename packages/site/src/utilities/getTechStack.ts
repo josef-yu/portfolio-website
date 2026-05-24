@@ -1,7 +1,7 @@
-import { getCollection } from "astro:content";
+import { getCollection } from 'astro:content';
 
-import { type PillEntries } from "../content.config";
-import { getTimeDiff } from "./getTimeDiff";
+import { type PillEntries } from '../content.config';
+import { getTimeDiff } from './getTimeDiff';
 
 export type TechStack = PillEntries[0] & {
   duration: string;
@@ -26,9 +26,7 @@ const START_DATE = 0;
 // Index for date range end
 const END_DATE = 1;
 
-export async function getTechStack(
-  collectionName: "work" | "project",
-): Promise<TechStack[]> {
+export async function getTechStack(collectionName: 'work' | 'project'): Promise<TechStack[]> {
   const entries = await getCollection(collectionName);
 
   // Key by name only so the same tech aggregates across entries regardless of note/icon variation
@@ -69,10 +67,7 @@ export async function getTechStack(
           pushDate = false;
           break;
         }
-        if (
-          startDate === newRange[START_DATE] &&
-          endDate === newRange[END_DATE]
-        ) {
+        if (startDate === newRange[START_DATE] && endDate === newRange[END_DATE]) {
           pushDate = false;
           break;
         }
@@ -94,8 +89,7 @@ export async function getTechStack(
       for (const [start, end] of meta.dates) {
         elapsed += end.valueOf() - start.valueOf();
       }
-      const years =
-        Math.round((elapsed / 31556952000 + Number.EPSILON) * 10) / 10;
+      const years = Math.round((elapsed / 31556952000 + Number.EPSILON) * 10) / 10;
       return {
         name,
         note: meta.noteFragments.length > 0 ? meta.noteFragments : undefined,

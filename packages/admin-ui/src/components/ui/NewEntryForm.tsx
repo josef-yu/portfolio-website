@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { slugify } from '../../utils/text';
 
 interface NewEntryFormProps {
   label: string;
@@ -15,8 +16,7 @@ export default function NewEntryForm({ label, onCancel, onCreate }: NewEntryForm
     inputRef.current?.focus();
   }, []);
 
-  // Sanitise the input into a valid slug on the fly
-  const slug = value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  const slug = slugify(value);
 
   async function handleCreate() {
     if (!slug) return;
@@ -46,17 +46,15 @@ export default function NewEntryForm({ label, onCancel, onCreate }: NewEntryForm
             spellCheck={false}
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleCreate();
+            }}
           />
           <span className="hint">Lowercase, hyphens only. Becomes the URL slug.</span>
         </div>
 
         <div className="new-form-actions">
-          <button
-            className="btn btn-primary"
-            onClick={handleCreate}
-            disabled={!slug || loading}
-          >
+          <button className="btn btn-primary" onClick={handleCreate} disabled={!slug || loading}>
             {loading ? 'Creating…' : 'Create'}
           </button>
           <button className="btn" onClick={onCancel}>

@@ -10,11 +10,9 @@ async function apiFetch<T>(method: string, route: string, body?: unknown): Promi
 }
 
 export const api = {
-  getCollections: () =>
-    apiFetch<CollectionMeta[]>('GET', '/collections'),
+  getCollections: () => apiFetch<CollectionMeta[]>('GET', '/collections'),
 
-  getEntries: (c: string) =>
-    apiFetch<Entry[]>('GET', `/entries?c=${c}`),
+  getEntries: (c: string) => apiFetch<Entry[]>('GET', `/entries?c=${c}`),
 
   getEntry: (c: string, id: string) =>
     apiFetch<{ content: string }>('GET', `/entry?c=${c}&id=${id}`),
@@ -25,6 +23,5 @@ export const api = {
   postEntry: (c: string, id: string, content: string) =>
     apiFetch<{ ok?: boolean; error?: string }>('POST', `/entry?c=${c}&id=${id}`, { content }),
 
-  getTags: (c: string) =>
-    apiFetch<string[]>('GET', `/tags?c=${c}`),
+  getTags: (c: string) => apiFetch<string[]>('GET', `/tags?c=${c}`),
 };

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
-import { calcReadMin, today } from '../utils';
-import type { WritingMetaState } from '../types';
+import { calcReadMin } from '../../utils/text';
+import { today } from '../../utils/date';
+import type { WritingMetaState } from '../../types';
 import TagInput from './TagInput';
 
 interface WritingMetaProps {
@@ -16,25 +17,16 @@ export default function WritingMeta({
   availableTags,
   onMetaChange,
 }: WritingMetaProps) {
-  const set = (patch: Partial<WritingMetaState>) =>
-    onMetaChange({ ...meta, ...patch });
+  // Convenience patcher — merges a partial update into the current meta
+  const set = (patch: Partial<WritingMetaState>) => onMetaChange({ ...meta, ...patch });
 
-  // Keep the auto read time in sync with body word count
+  // Keep auto read time in sync as the body changes
   useEffect(() => {
-    if (meta.readMinAuto) {
-      set({ readMin: calcReadMin(bodyContent) });
-    }
-    // Only re-run when bodyContent changes or readMinAuto toggles
+    if (meta.readMinAuto) set({ readMin: calcReadMin(bodyContent) });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bodyContent, meta.readMinAuto]);
 
-  // ── Publish date hint ──────────────────────────────────────────────────────
-
-  const pubDateHint = meta.draft
-    ? 'Set to today on first publish'
-    : 'Will be set to today on save';
-
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const pubDateHint = meta.draft ? 'Set to today on first publish' : 'Will be set to today on save';
 
   return (
     <>
@@ -122,18 +114,12 @@ export default function WritingMeta({
           {!meta.pubDateOverride && (
             <button
               className="link-btn"
-              onClick={() =>
-                set({
-                  pubDateOverride: true,
-                  pubDate: meta.pubDate || today(),
-                })
-              }
+              onClick={() => set({ pubDateOverride: true, pubDate: meta.pubDate || today() })}
             >
               Override
             </button>
           )}
         </span>
-
         {meta.pubDateOverride ? (
           <div className="pubdate-row">
             <input
@@ -142,10 +128,7 @@ export default function WritingMeta({
               value={meta.pubDate}
               onChange={(e) => set({ pubDate: e.target.value })}
             />
-            <button
-              className="link-btn"
-              onClick={() => set({ pubDateOverride: false })}
-            >
+            <button className="link-btn" onClick={() => set({ pubDateOverride: false })}>
               Remove override
             </button>
           </div>
