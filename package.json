@@ -1,15 +1,20 @@
 {
   "name": "josefyu-portfolio",
-  "type": "module",
+  "private": true,
   "version": "0.0.1",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "dev": "npm run dev -w packages/admin-ui & npm run dev -w packages/site",
+    "build": "npm run build -w packages/admin-ui && npm run build -w packages/site",
+    "preview": "npm run preview -w packages/site",
+    "admin:dev": "npm run dev -w packages/admin-ui",
+    "admin:build": "npm run build -w packages/admin-ui",
+    "site:dev": "npm run dev -w packages/site",
+    "site:build": "npm run build -w packages/site"
   },
-  "dependencies": {
-    "astro": "^5.15.2",
-    "astro-tooltips": "^0.6.2"
+  "devDependencies": {
+    "turbo": "^2.0.0"
   }
 }
