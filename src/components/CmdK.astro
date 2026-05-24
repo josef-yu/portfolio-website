@@ -1,0 +1,248 @@
+<!-- Command palette — triggered by ⌘K / Ctrl+K or a custom 'cmdk:open' event -->
+<div id="cmdk-root" aria-hidden="true">
+	<div id="cmdk-back">
+		<div id="cmdk" role="dialog" aria-modal="true" aria-label="Search">
+			<input
+				id="cmdk-input"
+				type="search"
+				placeholder="Jump to a page, post, or project…"
+				autocomplete="off"
+				spellcheck="false"
+			/>
+			<div id="cmdk-results" role="listbox"></div>
+		</div>
+	</div>
+</div>
+
+<script>
+	type Item = { url: string; label: string; kind: string };
+
+	let index: Item[] | null = null;
+	let sel = 0;
+	let filtered: Item[] = [];
+
+	const root    = document.getElementById('cmdk-root')!;
+	const back    = document.getElementById('cmdk-back')!;
+	const dialog  = document.getElementById('cmdk')!;
+	const input   = document.getElementById('cmdk-input') as HTMLInputElement;
+	const results = document.getElementById('cmdk-results')!;
+
+	// ── Index ────────────────────────────────────────────────────────────
+	async function loadIndex() {
+		if (index) return;
+		const res = await fetch('/search-index.json');
+		index = await res.json() as Item[];
+	}
+
+	// ── Render ───────────────────────────────────────────────────────────
+	function render() {
+		const term = input.value.trim().toLowerCase();
+		filtered = !term || !index
+			? (index ?? [])
+			: index.filter((it) => it.label.toLowerCase().includes(term));
+
+		if (filtered.length === 0) {
+			results.innerHTML = '<div class="cmdk-empty">No matches</div>';
+			return;
+		}
+
+		results.innerHTML = filtered
+			.map((it, i) => `
+				<a
+					class="cmdk-item"
+					href="${it.url}"
+					data-idx="${i}"
+					role="option"
+					aria-selected="${i === sel}"
+				>
+					<span>${it.label}</span>
+					<span class="cmdk-kind">${it.kind}</span>
+				</a>
+			`)
+			.join('');
+
+		results.querySelectorAll<HTMLElement>('.cmdk-item').forEach((el) => {
+			el.addEventListener('mouseenter', () => {
+				sel = Number(el.dataset.idx);
+				updateSel();
+			});
+		});
+	}
+
+	function updateSel() {
+		results.querySelectorAll<HTMLElement>('.cmdk-item').forEach((el, i) => {
+			el.setAttribute('aria-selected', String(i === sel));
+		});
+	}
+
+	function navigate() {
+		const item = filtered[sel];
+		if (item) window.location.href = item.url;
+	}
+
+	// ── Open / close ─────────────────────────────────────────────────────
+	async function open() {
+		root.removeAttribute('aria-hidden');
+		input.value = '';
+		sel = 0;
+		await loadIndex();
+		render();
+		// Defer focus so the dialog is visible first
+		setTimeout(() => input.focus(), 30);
+	}
+
+	function close() {
+		root.setAttribute('aria-hidden', 'true');
+		input.blur();
+	}
+
+	function isOpen() {
+		return root.getAttribute('aria-hidden') !== 'true';
+	}
+
+	// ── OS / input detection ─────────────────────────────────────────────
+	const platform = (navigator as any).userAgentData?.platform ?? navigator.platform ?? '';
+	const isMac = /mac/i.test(platform);
+	const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+
+	// Update every shortcut label on the page
+	document.querySelectorAll<HTMLElement>('[data-cmdk-kbd]').forEach((el) => {
+		if (!hasFinePointer) {
+			// Touch-only device — hide the shortcut hint entirely
+			el.hidden = true;
+		} else {
+			el.textContent = isMac ? '⌘K' : 'Ctrl+K';
+		}
+	});
+
+	// ── Events ───────────────────────────────────────────────────────────
+	// External trigger (nav button, 404 page button)
+	document.addEventListener('cmdk:open', open);
+
+	// ⌘K / Ctrl+K global shortcut
+	document.addEventListener('keydown', (e) => {
+		if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+			e.preventDefault();
+			isOpen() ? close() : open();
+		}
+		if (!isOpen()) return;
+		if (e.key === 'Escape') { close(); return; }
+		if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			sel = Math.min(filtered.length - 1, sel + 1);
+			updateSel();
+			results.querySelectorAll('.cmdk-item')[sel]?.scrollIntoView({ block: 'nearest' });
+		}
+		if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			sel = Math.max(0, sel - 1);
+			updateSel();
+			results.querySelectorAll('.cmdk-item')[sel]?.scrollIntoView({ block: 'nearest' });
+		}
+		if (e.key === 'Enter') { e.preventDefault(); navigate(); }
+	});
+
+	// Click backdrop to close
+	back.addEventListener('click', close);
+	dialog.addEventListener('click', (e) => e.stopPropagation());
+
+	// Live filter as user types
+	input.addEventListener('input', () => { sel = 0; render(); });
+</script>
+
+<style>
+	#cmdk-root {
+		display: contents;
+	}
+
+	#cmdk-root[aria-hidden='true'] #cmdk-back {
+		display: none;
+	}
+
+	#cmdk-back {
+		position: fixed;
+		inset: 0;
+		z-index: 200;
+		background: color-mix(in oklab, var(--ink) 30%, transparent);
+		-webkit-backdrop-filter: blur(6px);
+		backdrop-filter: blur(6px);
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+		padding-top: 16vh;
+		animation: cmdk-fade 0.18s ease;
+	}
+
+	@keyframes cmdk-fade {
+		from { opacity: 0; }
+		to   { opacity: 1; }
+	}
+
+	#cmdk {
+		width: min(560px, 92vw);
+		background: var(--surface);
+		border: 1px solid var(--line);
+		border-radius: var(--r-lg);
+		overflow: hidden;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.16);
+	}
+
+	#cmdk-input {
+		width: 100%;
+		border: 0;
+		background: transparent;
+		padding: 14px 16px;
+		color: var(--ink);
+		font-size: 14.5px;
+		font-family: var(--font-sans);
+		outline: none;
+		border-bottom: 1px solid var(--line);
+		/* Remove browser search decorations */
+		-webkit-appearance: none;
+	}
+
+	#cmdk-input::placeholder { color: var(--ink-3); }
+	#cmdk-input::-webkit-search-cancel-button { display: none; }
+
+	#cmdk-results {
+		max-height: 360px;
+		overflow-y: auto;
+		padding: 6px;
+	}
+
+	:global(.cmdk-item) {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 8px 10px;
+		border-radius: var(--r-sm);
+		font-size: 13.5px;
+		color: var(--ink);
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	:global(.cmdk-item[aria-selected='true']) {
+		background: var(--accent-soft);
+	}
+
+	:global(.cmdk-kind) {
+		font-family: var(--font-mono);
+		font-size: 10px;
+		color: var(--ink-3);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	:global(.cmdk-empty) {
+		padding: 28px;
+		text-align: center;
+		color: var(--ink-3);
+		font-family: var(--font-mono);
+		font-size: 12px;
+	}
+
+	@media (max-width: 560px) {
+		#cmdk-input { font-size: 14px; padding: 12px 14px; }
+	}
+</style>
