@@ -1,0 +1,191 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const allWork = await getCollection('work');
+
+// Current role = active (no endDate), or most recent if all ended
+const currentWork = allWork
+	.sort((a, b) => b.data.startDate.valueOf() - a.data.startDate.valueOf())
+	.find((w) => !w.data.endDate)
+	?? allWork.sort((a, b) =>
+		(b.data.endDate?.valueOf() ?? 0) - (a.data.endDate?.valueOf() ?? 0)
+	)[0];
+---
+
+<BaseLayout title="404 — Not Found" description="Page not found.">
+	<main class="wrap nf-wrap">
+		<div class="nf-term" aria-hidden="true">
+			<div class="nf-term-line">
+				<span class="nf-term-prompt">$</span> cat <span class="nf-term-arg nf-path">/</span>
+			</div>
+			<div class="nf-term-err">cat: <span class="nf-path-err">/</span>: No such file or directory</div>
+			<div class="nf-term-line">
+				<span class="nf-term-prompt">$</span> <span class="nf-term-cursor">_</span>
+			</div>
+		</div>
+
+		<h1 class="nf-title">Nothing here.</h1>
+		<p class="nf-sub">
+			The URL you tried doesn't map to anything I've written or built.
+			Could be a stale link, a typo, or a page I haven't shipped yet.
+		</p>
+
+		<div class="nf-cta-row">
+			<a class="btn" href="/">← Back to home</a>
+			<button class="btn ghost" id="nf-cmd-btn">Search <span data-cmdk-kbd>⌘K</span></button>
+		</div>
+
+		<div class="nf-suggest">
+			<div class="nf-label">Or try one of these</div>
+			<div class="nf-suggest-list">
+				<a href="/writing/" class="nf-suggest-row">
+					<span>Read recent writing</span>
+					<span class="nf-suggest-path">/writing/ →</span>
+				</a>
+				<a href={`/work/${currentWork.id}`} class="nf-suggest-row">
+					<span>See current role at {currentWork.data.employer}</span>
+					<span class="nf-suggest-path">/work/{currentWork.id} →</span>
+				</a>
+				<a href="/projects/" class="nf-suggest-row">
+					<span>Browse projects</span>
+					<span class="nf-suggest-path">/projects/ →</span>
+				</a>
+				<a href="/work/" class="nf-suggest-row">
+					<span>Full work history</span>
+					<span class="nf-suggest-path">/work/ →</span>
+				</a>
+			</div>
+		</div>
+	</main>
+</BaseLayout>
+
+<script>
+	// Show the actual path that 404'd in the terminal block
+	const path = window.location.pathname + (window.location.search || '');
+	document.querySelectorAll('.nf-path, .nf-path-err').forEach((el) => {
+		el.textContent = path;
+	});
+
+	// Wire ⌘K button to open the command palette
+	document.getElementById('nf-cmd-btn')?.addEventListener('click', (e) => {
+		e.preventDefault();
+		document.dispatchEvent(new CustomEvent('cmdk:open'));
+	});
+</script>
+
+<style>
+	.nf-wrap {
+		padding-block: clamp(56px, 9vw, 120px) clamp(48px, 8vw, 96px);
+		max-width: 720px;
+	}
+
+	/* ── Terminal block ─────────────────────────────────────────────────── */
+	.nf-term {
+		background: var(--bg-2);
+		border: 1px solid var(--line);
+		border-radius: var(--r-md);
+		padding: 18px 20px;
+		margin-bottom: 32px;
+		font-family: var(--font-mono);
+		font-size: 13px;
+		line-height: 1.65;
+		color: var(--ink-2);
+		letter-spacing: 0.01em;
+		overflow-x: auto;
+	}
+
+	.nf-term-prompt { color: var(--ink-3); margin-right: 8px; user-select: none; }
+	.nf-term-arg { color: var(--ink); }
+	.nf-term-err { color: var(--ink-2); }
+
+	.nf-term-cursor {
+		display: inline-block;
+		width: 0.5em;
+		background: var(--ink);
+		color: var(--ink);
+		animation: nf-blink 1.1s steps(1) infinite;
+	}
+
+	@keyframes nf-blink {
+		50% { background: transparent; color: transparent; }
+	}
+
+	/* ── Copy ───────────────────────────────────────────────────────────── */
+	.nf-title {
+		font-family: var(--font-sans);
+		font-weight: 500;
+		font-size: clamp(32px, 4.4vw, 48px);
+		letter-spacing: -0.02em;
+		line-height: 1.06;
+		margin: 0 0 16px;
+		color: var(--ink);
+		text-wrap: balance;
+	}
+
+	.nf-sub {
+		font-size: 16.5px;
+		color: var(--ink-2);
+		line-height: 1.6;
+		max-width: 540px;
+		text-wrap: pretty;
+		margin: 0 0 28px;
+	}
+
+	/* ── CTAs ───────────────────────────────────────────────────────────── */
+	.nf-cta-row {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+		margin-bottom: 48px;
+	}
+
+	/* ── Suggestions ────────────────────────────────────────────────────── */
+	.nf-suggest {
+		padding-top: 24px;
+		border-top: 1px solid var(--line);
+	}
+
+	.nf-label {
+		font-family: var(--font-mono);
+		font-size: 10.5px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--ink-3);
+		margin-bottom: 14px;
+	}
+
+	.nf-suggest-list { display: flex; flex-direction: column; }
+
+	.nf-suggest-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		padding: 12px 0;
+		border-bottom: 1px solid var(--line-2);
+		font-size: 15px;
+		color: var(--ink);
+		text-decoration: none;
+		transition: padding-left 0.18s ease, color 0.18s ease;
+		gap: 16px;
+	}
+
+	.nf-suggest-row:hover { padding-left: 6px; }
+	.nf-suggest-row:last-child { border-bottom: 0; }
+
+	.nf-suggest-path {
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: var(--ink-3);
+		white-space: nowrap;
+		transition: color 0.18s ease;
+	}
+
+	.nf-suggest-row:hover .nf-suggest-path { color: var(--ink-2); }
+
+	/* ── Responsive ─────────────────────────────────────────────────────── */
+	@media (max-width: 560px) {
+		.nf-term { font-size: 12px; padding: 14px 16px; }
+		.nf-suggest-row { flex-direction: column; gap: 4px; align-items: flex-start; }
+	}
+</style>

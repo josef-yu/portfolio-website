@@ -1,0 +1,252 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+type ProjectEntry = CollectionEntry<'project'>;
+type WorkEntry = CollectionEntry<'work'>;
+
+interface Props {
+	entry: ProjectEntry;
+}
+
+export async function getStaticPaths() {
+	const projectEntries = await getCollection('project');
+
+	return projectEntries.map((entry) => ({
+		params: { slug: entry.id },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+
+const fmtDate = (d: Date) =>
+	d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+
+const allWork = await getCollection('work');
+
+const relatedWork: WorkEntry[] = allWork
+	.filter((w) => w.data.projects.some((ref) => ref.id === entry.id))
+	.sort(
+		(a, b) =>
+			(b.data.endDate?.valueOf() ?? Date.now()) -
+			(a.data.endDate?.valueOf() ?? Date.now()),
+	);
+
+const pageTitle = `${entry.data.title} — Joseph Yu`;
+const pageDesc = entry.data.description;
+---
+
+<BaseLayout title={pageTitle} description={pageDesc}>
+	<header class="wrap page-head">
+		<div class="crumbs">
+			<a href="/">Home</a>
+			<span class="sep">/</span>
+			<a href="/projects/">Projects</a>
+			<span class="sep">/</span>
+			<span class="co-crumb">{entry.data.tags[0] ?? 'Project'}</span>
+		</div>
+		<h1>{entry.data.title}</h1>
+		{entry.data.tags.length > 0 && (
+			<p class="sub">
+				{entry.data.tags.join(' · ')}
+			</p>
+		)}
+	</header>
+
+	<main class="wrap" style="padding-block: 32px 96px;">
+		{entry.data.nda && (
+			<div class="nda-notice">
+				<span class="nda-icon">🔒</span>
+				<div>
+					<strong>Under NDA</strong>
+					<p>This project is covered by a non-disclosure agreement. The details above reflect what's publicly available via my CV.</p>
+				</div>
+			</div>
+		)}
+
+		<div class="role-overview">
+			<div class="lbl">Overview</div>
+			<div>
+				<p class="about">{entry.data.description}</p>
+				{entry.data.tech_stack.length > 0 && (
+					<div class="pill-row">
+						{entry.data.tech_stack.map((t) => (
+							<span class="tag">{t.name}</span>
+						))}
+					</div>
+				)}
+			</div>
+		</div>
+
+		{relatedWork.length > 0 && (
+			<div class="linked-section">
+				<div class="lbl" style="margin-bottom: 12px;">Related Experience</div>
+				<div class="mini-list">
+					{relatedWork.map((w) => (
+						<a class="mini-row" href={`/work/${w.id}`}>
+							<div class="mini-info">
+								<span class="mini-name">{w.data.role}</span>
+								<span class="mini-sub">
+									{w.data.employer} · {fmtDate(w.data.startDate)} → {w.data.endDate ? fmtDate(w.data.endDate) : 'Present'}
+								</span>
+							</div>
+							<span class="mini-arrow">↗</span>
+						</a>
+					))}
+				</div>
+			</div>
+		)}
+	</main>
+</BaseLayout>
+
+<style>
+	/* ── Page header ────────────────────────────────────────────────────── */
+	.page-head .crumbs .co-crumb { color: var(--ink-2); }
+
+	.page-head .sub {
+		font-family: var(--font-mono);
+		font-size: 12.5px;
+		color: var(--ink-3);
+		letter-spacing: 0.02em;
+	}
+
+	/* ── Role overview ──────────────────────────────────────────────────── */
+	.role-overview {
+		display: grid;
+		grid-template-columns: 200px 1fr;
+		gap: 40px;
+		padding: 24px 0 32px;
+		border-bottom: 1px solid var(--line);
+		margin-bottom: 48px;
+	}
+
+	.lbl {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--ink-3);
+	}
+
+	.about {
+		font-family: var(--font-serif);
+		font-size: 17px;
+		line-height: 1.65;
+		color: var(--ink);
+		max-width: 620px;
+		text-wrap: pretty;
+		margin: 0;
+	}
+
+	.pill-row {
+		margin-top: 18px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+
+	.tag {
+		font-family: var(--font-mono);
+		font-size: 10.5px;
+		letter-spacing: 0.02em;
+		padding: 2px 8px;
+		border-radius: 999px;
+		color: var(--ink-2);
+		border: 1px solid var(--line);
+		background: var(--surface);
+		white-space: nowrap;
+	}
+
+	/* ── NDA notice ─────────────────────────────────────────────────────── */
+	.nda-notice {
+		display: flex;
+		gap: 14px;
+		background: var(--surface);
+		border: 1px solid var(--line);
+		border-radius: var(--r-md);
+		padding: 20px;
+		margin-bottom: 40px;
+		align-items: flex-start;
+	}
+
+	.nda-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+	.nda-notice strong {
+		display: block;
+		font-family: var(--font-sans);
+		font-weight: 500;
+		font-size: 15px;
+		color: var(--ink);
+		margin-bottom: 6px;
+	}
+
+	.nda-notice p {
+		font-size: 14px;
+		color: var(--ink-2);
+		line-height: 1.55;
+		margin: 0;
+	}
+
+	/* ── Related experience list ────────────────────────────────────────── */
+	.linked-section { margin-top: 56px; }
+
+	.mini-list {
+		display: flex;
+		flex-direction: column;
+		border-top: 1px solid var(--line);
+	}
+
+	.mini-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 14px 0;
+		border-bottom: 1px solid var(--line);
+		text-decoration: none;
+		color: inherit;
+		transition: padding-left 0.2s ease;
+	}
+
+	.mini-row:hover { padding-left: 6px; }
+
+	.mini-info {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 3px;
+	}
+
+	.mini-name {
+		font-family: var(--font-sans);
+		font-weight: 500;
+		font-size: 15px;
+		color: var(--ink);
+	}
+
+	.mini-sub {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		color: var(--ink-3);
+		letter-spacing: 0.02em;
+	}
+
+	.mini-arrow {
+		font-family: var(--font-mono);
+		font-size: 13px;
+		color: var(--ink-3);
+		transition: color 0.18s;
+	}
+
+	.mini-row:hover .mini-arrow { color: var(--ink); }
+
+	/* ── Responsive ─────────────────────────────────────────────────────── */
+	@media (max-width: 920px) {
+		.role-overview { grid-template-columns: 1fr; gap: 16px; }
+	}
+
+	@media (max-width: 560px) {
+		.page-head .crumbs { font-size: 11px; margin-bottom: 16px; }
+		.page-head h1 { font-size: clamp(26px, 7vw, 34px); }
+	}
+</style>

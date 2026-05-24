@@ -1,0 +1,423 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+type WorkEntry = CollectionEntry<'work'>;
+type ProjectEntry = CollectionEntry<'project'>;
+
+interface Props {
+	entry: WorkEntry;
+	prev: WorkEntry | null;
+	next: WorkEntry | null;
+}
+
+export async function getStaticPaths() {
+	const workEntries = await getCollection('work');
+
+	const sorted = workEntries.sort(
+		(a, b) =>
+			(b.data.endDate?.valueOf() ?? Date.now()) -
+			(a.data.endDate?.valueOf() ?? Date.now()),
+	);
+
+	return sorted.map((entry, idx) => ({
+		params: { slug: entry.id },
+		props: {
+			entry,
+			prev: idx > 0 ? sorted[idx - 1] : null,
+			next: idx < sorted.length - 1 ? sorted[idx + 1] : null,
+		},
+	}));
+}
+
+const { entry, prev, next } = Astro.props;
+
+const fmtDate = (d: Date) =>
+	d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+
+const linkedProjects: ProjectEntry[] = (await getCollection('project')).filter((p) =>
+	entry.data.projects.some((ref) => ref.id === p.id),
+);
+
+const pageTitle = `${entry.data.role} at ${entry.data.employer} — Joseph Yu`;
+const pageDesc = entry.data.summary ?? `${entry.data.role} at ${entry.data.employer}`;
+---
+
+<BaseLayout title={pageTitle} description={pageDesc}>
+	<header class="wrap page-head">
+		<div class="crumbs">
+			<a href="/">Home</a>
+			<span class="sep">/</span>
+			<a href="/work/">Work</a>
+			<span class="sep">/</span>
+			<span class="co-crumb">{entry.data.employer}</span>
+		</div>
+		<h1>{entry.data.role}</h1>
+		<p class="sub">
+			<strong>{entry.data.employer}</strong>
+			{entry.data.org && <> · {entry.data.org}</>}
+			{' · '}{entry.data.location}
+			<span class="when">
+				{fmtDate(entry.data.startDate)} → {entry.data.endDate ? fmtDate(entry.data.endDate) : 'Present'}
+			</span>
+		</p>
+	</header>
+
+	<main class="wrap" style="padding-block: 32px 96px;">
+		<div class="role-overview">
+			<div class="lbl">Role</div>
+			<div>
+				{entry.data.summary && (
+					<p class="about">{entry.data.summary}</p>
+				)}
+				{entry.data.tech_stack.length > 0 && (
+					<div class="pill-row">
+						{entry.data.tech_stack.map((t) => (
+							<span class="tag">{t.name}</span>
+						))}
+					</div>
+				)}
+			</div>
+		</div>
+
+		{entry.data.achievements.length > 0 && (
+			<>
+				<div class="kw-label">Key Work</div>
+				<div>
+					{entry.data.achievements.map((ach, i) => (
+						<div class="achievement">
+							<div class="ach-side">
+								<span class="num">
+									{String(i + 1).padStart(2, '0')} / {String(entry.data.achievements.length).padStart(2, '0')}
+								</span>
+								{ach.metric && <span class="metric">{ach.metric}</span>}
+							</div>
+							<div class="ach-body">
+								<h3>{ach.title}</h3>
+								{ach.context && (
+									<div class="ach-block">
+										<div class="k">Context</div>
+										<div class="v">{ach.context}</div>
+									</div>
+								)}
+								{ach.approach && (
+									<div class="ach-block">
+										<div class="k">Approach</div>
+										<div class="v">{ach.approach}</div>
+									</div>
+								)}
+								{ach.result && (
+									<div class="ach-block">
+										<div class="k">Result</div>
+										<div class="v">{ach.result}</div>
+									</div>
+								)}
+							</div>
+						</div>
+					))}
+				</div>
+			</>
+		)}
+
+		{linkedProjects.length > 0 && (
+			<div class="linked-section">
+				<div class="lbl" style="margin-bottom: 12px;">Projects</div>
+				<div class="mini-list">
+					{linkedProjects.map((p) => (
+						<a class="mini-row" href={`/projects/${p.id}`}>
+							<span class="mini-name">
+								{p.data.title}
+								{p.data.nda && <span class="nda-badge">NDA</span>}
+							</span>
+							<span class="mini-arrow">↗</span>
+						</a>
+					))}
+				</div>
+			</div>
+		)}
+
+		<div class="role-nav">
+			<div>
+				{next
+					? (
+						<a href={`/work/${next.id}`}>
+							<span class="l">Earlier</span>
+							← {next.data.role} · {next.data.employer}
+						</a>
+					) : (
+						<a class="dim" href="/work/">
+							<span class="l">More</span>
+							← All work
+						</a>
+					)
+				}
+			</div>
+			<div style="text-align: right;">
+				{prev
+					? (
+						<a href={`/work/${prev.id}`}>
+							<span class="l">Later</span>
+							{prev.data.role} · {prev.data.employer} →
+						</a>
+					) : (
+						<a class="dim" href="/work/">
+							<span class="l">More</span>
+							All work →
+						</a>
+					)
+				}
+			</div>
+		</div>
+	</main>
+</BaseLayout>
+
+<style>
+	/* ── Page header ────────────────────────────────────────────────────── */
+	.page-head .crumbs .co-crumb { color: var(--ink-2); }
+
+	.page-head .sub {
+		font-size: 15px;
+		color: var(--ink-3);
+		font-family: var(--font-mono);
+		letter-spacing: 0.02em;
+	}
+
+	.page-head .sub strong { color: var(--ink-2); font-weight: 500; }
+
+	.page-head .sub .when {
+		margin-left: 18px;
+		opacity: 0.7;
+	}
+
+	/* ── Role overview ──────────────────────────────────────────────────── */
+	.role-overview {
+		display: grid;
+		grid-template-columns: 200px 1fr;
+		gap: 40px;
+		padding: 24px 0 32px;
+		border-bottom: 1px solid var(--line);
+		margin-bottom: 48px;
+	}
+
+	.lbl {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--ink-3);
+	}
+
+	.about {
+		font-family: var(--font-serif);
+		font-size: 17px;
+		line-height: 1.65;
+		color: var(--ink);
+		max-width: 620px;
+		text-wrap: pretty;
+		margin: 0;
+	}
+
+	.pill-row {
+		margin-top: 18px;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+
+	.tag {
+		font-family: var(--font-mono);
+		font-size: 10.5px;
+		letter-spacing: 0.02em;
+		padding: 2px 8px;
+		border-radius: 999px;
+		color: var(--ink-2);
+		border: 1px solid var(--line);
+		background: var(--surface);
+		white-space: nowrap;
+	}
+
+	/* ── Key Work label ─────────────────────────────────────────────────── */
+	.kw-label {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--ink-3);
+		margin-bottom: 8px;
+	}
+
+	/* ── Achievement ────────────────────────────────────────────────────── */
+	.achievement {
+		padding: 32px 0;
+		border-top: 1px solid var(--line);
+		display: grid;
+		grid-template-columns: 200px 1fr;
+		gap: 40px;
+	}
+
+	.achievement:last-child { border-bottom: 1px solid var(--line); }
+
+	.ach-side {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.ach-side .num {
+		font-family: var(--font-mono);
+		font-size: 10.5px;
+		letter-spacing: 0.06em;
+		color: var(--ink-3);
+	}
+
+	.ach-side .metric {
+		font-family: var(--font-mono);
+		font-size: 12px;
+		color: var(--ink-2);
+		letter-spacing: 0.02em;
+		background: var(--surface);
+		border: 1px solid var(--line);
+		padding: 6px 10px;
+		border-radius: var(--r-sm);
+		display: inline-block;
+		align-self: flex-start;
+		max-width: 180px;
+		line-height: 1.4;
+	}
+
+	.achievement h3 {
+		font-family: var(--font-sans);
+		font-weight: 500;
+		font-size: 22px;
+		letter-spacing: -0.012em;
+		line-height: 1.2;
+		margin: 0 0 16px;
+		color: var(--ink);
+		text-wrap: balance;
+	}
+
+	.ach-block {
+		margin-bottom: 14px;
+		display: grid;
+		grid-template-columns: 80px 1fr;
+		gap: 16px;
+		align-items: baseline;
+	}
+
+	.ach-block:last-child { margin-bottom: 0; }
+
+	.ach-block .k {
+		font-family: var(--font-mono);
+		font-size: 10.5px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--ink-3);
+		padding-top: 4px;
+	}
+
+	.ach-block .v {
+		font-family: var(--font-serif);
+		font-size: 16px;
+		color: var(--ink);
+		line-height: 1.65;
+		text-wrap: pretty;
+		max-width: 580px;
+	}
+
+	/* ── Linked projects ────────────────────────────────────────────────── */
+	.linked-section { margin-top: 56px; }
+
+	.mini-list {
+		display: flex;
+		flex-direction: column;
+		border-top: 1px solid var(--line);
+	}
+
+	.mini-row {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		padding: 14px 0;
+		border-bottom: 1px solid var(--line);
+		text-decoration: none;
+		color: inherit;
+		transition: padding-left 0.2s ease;
+	}
+
+	.mini-row:hover { padding-left: 6px; }
+
+	.mini-name {
+		font-family: var(--font-sans);
+		font-weight: 500;
+		font-size: 15px;
+		color: var(--ink);
+		flex: 1;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.mini-arrow {
+		font-family: var(--font-mono);
+		font-size: 13px;
+		color: var(--ink-3);
+		transition: color 0.18s;
+	}
+
+	.mini-row:hover .mini-arrow { color: var(--ink); }
+
+	/* ── NDA badge ──────────────────────────────────────────────────────── */
+	.nda-badge {
+		font-family: var(--font-mono);
+		font-size: 9px;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--ink-3);
+		border: 1px solid var(--line);
+		border-radius: 3px;
+		padding: 1px 5px;
+		white-space: nowrap;
+	}
+
+	/* ── Role nav ───────────────────────────────────────────────────────── */
+	.role-nav {
+		margin-top: 56px;
+		padding-top: 24px;
+		border-top: 1px solid var(--line);
+		display: flex;
+		justify-content: space-between;
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: var(--ink-3);
+		letter-spacing: 0.02em;
+		gap: 16px;
+	}
+
+	.role-nav a { color: var(--ink-2); text-decoration: none; max-width: 45%; }
+	.role-nav a:hover { color: var(--ink); }
+	.role-nav a.dim { color: var(--ink-3); }
+	.role-nav .l { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); margin-bottom: 4px; }
+
+	/* ── Responsive ─────────────────────────────────────────────────────── */
+	@media (max-width: 920px) {
+		.role-overview { grid-template-columns: 1fr; gap: 16px; }
+		.achievement { grid-template-columns: 1fr; gap: 16px; padding: 24px 0; }
+		.achievement .ach-side { flex-direction: row; align-items: center; gap: 12px; }
+		.ach-side .metric { max-width: none; }
+		.ach-block { grid-template-columns: 1fr; gap: 4px; }
+		.ach-block .k { padding-top: 0; }
+		.ach-block .v { font-size: 15.5px; }
+		.achievement h3 { font-size: 20px; }
+	}
+
+	@media (max-width: 560px) {
+		.achievement { padding: 22px 0; gap: 12px; }
+		.achievement h3 { font-size: 18px; margin-bottom: 12px; }
+		.ach-side { gap: 8px; flex-wrap: wrap; }
+		.ach-block .k { font-size: 10px; }
+		.ach-block .v { font-size: 14.5px; line-height: 1.6; }
+		.page-head .crumbs { font-size: 11px; margin-bottom: 16px; }
+		.page-head h1 { font-size: clamp(26px, 7vw, 34px); }
+	}
+</style>
