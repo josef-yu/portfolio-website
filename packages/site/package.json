@@ -1,0 +1,17 @@
+{
+  "name": "@portfolio/site",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.15.2",
+    "astro-tooltips": "^0.6.2",
+    "sharp": "^0.34.5"
+  }
+}
