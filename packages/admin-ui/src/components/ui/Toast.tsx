@@ -4,7 +4,5 @@ interface ToastProps {
 }
 
 export default function Toast({ msg, type }: ToastProps) {
-  return (
-    <div className={`toast show${type ? ` ${type}` : ''}`}>{msg}</div>
-  );
+  return <div className={`toast show${type ? ` ${type}` : ''}`}>{msg}</div>;
 }

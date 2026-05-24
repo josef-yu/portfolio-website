@@ -1,15 +1,15 @@
-import { getCollection } from "astro:content";
-import { type PillEntries } from "../content.config";
+import { getCollection } from 'astro:content';
+import { type PillEntries } from '../content.config';
 
 // Ordered list of categories — controls display order on the about page
 const CATEGORY_ORDER = [
-  "Languages",
-  "Backend",
-  "Frontend",
-  "Cloud · Infra",
-  "Data",
-  "DevOps & Tooling",
-  "AI / LLM",
+  'Languages',
+  'Backend',
+  'Frontend',
+  'Cloud · Infra',
+  'Data',
+  'DevOps & Tooling',
+  'AI / LLM',
 ];
 
 /**
@@ -18,7 +18,7 @@ const CATEGORY_ORDER = [
  * Only techs with a `category` field are included.
  */
 export async function getToolbelt(
-  collectionName: "work" | "project",
+  collectionName: 'work' | 'project',
 ): Promise<Record<string, string[]>> {
   const entries = await getCollection(collectionName);
 
@@ -47,7 +47,5 @@ export async function getToolbelt(
   }
 
   // Drop empty categories
-  return Object.fromEntries(
-    Object.entries(grouped).filter(([, items]) => items.length > 0),
-  );
+  return Object.fromEntries(Object.entries(grouped).filter(([, items]) => items.length > 0));
 }

@@ -1,4 +1,4 @@
-import type { WritingMetaState } from '../types';
+import type { WritingMetaState } from '../../types';
 import WritingMeta from './WritingMeta';
 
 interface EditorPaneProps {
@@ -15,8 +15,8 @@ interface EditorPaneProps {
 }
 
 /**
- * Insert two spaces at the cursor position when Tab is pressed.
- * Uses requestAnimationFrame to restore cursor after React re-renders.
+ * Inserts two spaces at the cursor when Tab is pressed.
+ * Uses requestAnimationFrame to restore the cursor position after React re-renders.
  */
 function handleTabKey(
   e: React.KeyboardEvent<HTMLTextAreaElement>,
@@ -27,8 +27,7 @@ function handleTabKey(
   const el = e.currentTarget;
   const start = el.selectionStart;
   const end = el.selectionEnd;
-  const next = el.value.slice(0, start) + '  ' + el.value.slice(end);
-  onChange(next);
+  onChange(el.value.slice(0, start) + '  ' + el.value.slice(end));
   requestAnimationFrame(() => {
     el.selectionStart = el.selectionEnd = start + 2;
   });
@@ -58,15 +57,15 @@ export default function EditorPane({
             onMetaChange={onWritingMetaChange}
           />
         ) : (
-          /* All other collections: raw YAML textarea */
+          /* All other collections: raw YAML frontmatter textarea */
           <div className="field-group">
             <span className="field-label">Frontmatter</span>
             <textarea
               className="code-area"
               value={fmContent}
+              spellCheck={false}
               onChange={(e) => onFmChange(e.target.value)}
               onKeyDown={(e) => handleTabKey(e, onFmChange)}
-              spellCheck={false}
             />
           </div>
         )}
@@ -76,9 +75,9 @@ export default function EditorPane({
           <textarea
             className="text-area"
             value={bodyContent}
+            spellCheck={false}
             onChange={(e) => onBodyChange(e.target.value)}
             onKeyDown={(e) => handleTabKey(e, onBodyChange)}
-            spellCheck={false}
           />
         </div>
       </div>
@@ -86,11 +85,7 @@ export default function EditorPane({
       {preview && (
         <div className="preview-panel">
           <div className="preview-label">Preview</div>
-          <iframe
-            src={previewSrc}
-            style={{ flex: 1, border: 'none', width: '100%', display: 'block' }}
-            title="Entry preview"
-          />
+          <iframe src={previewSrc} title="Entry preview" />
         </div>
       )}
     </div>

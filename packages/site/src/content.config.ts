@@ -1,5 +1,5 @@
-import { defineCollection, reference, z } from "astro:content";
-import { glob } from "astro/loaders";
+import { defineCollection, reference, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
 const pillEntries = z
   .array(
@@ -11,7 +11,7 @@ const pillEntries = z
       category: z.string().optional(),
       // Set false to exclude from the home page tech ranking (keeps toolbelt unaffected)
       showInHome: z.boolean().optional(),
-    })
+    }),
   )
   .default([]);
 
@@ -19,7 +19,7 @@ export type PillEntries = z.infer<typeof pillEntries>;
 
 export const collections = {
   writing: defineCollection({
-    loader: glob({ base: "./src/content/writing", pattern: "**/*.md" }),
+    loader: glob({ base: './src/content/writing', pattern: '**/*.md' }),
     schema: z.object({
       title: z.string(),
       description: z.string(),
@@ -31,7 +31,7 @@ export const collections = {
   }),
 
   project: defineCollection({
-    loader: glob({ base: "./src/content/project", pattern: "**/*.md" }),
+    loader: glob({ base: './src/content/project', pattern: '**/*.md' }),
     schema: z.object({
       title: z.string(),
       description: z.string(),
@@ -45,7 +45,7 @@ export const collections = {
   }),
 
   work: defineCollection({
-    loader: glob({ base: "./src/content/work", pattern: "**/*.md" }),
+    loader: glob({ base: './src/content/work', pattern: '**/*.md' }),
     schema: z.object({
       role: z.string(),
       employer: z.string(),
@@ -58,13 +58,17 @@ export const collections = {
       endDate: z.coerce.date().optional(),
 
       summary: z.string().optional(),
-      achievements: z.array(z.object({
-        title: z.string(),
-        metric: z.string().optional(),
-        context: z.string().optional(),
-        approach: z.string().optional(),
-        result: z.string().optional(),
-      })).default([]),
+      achievements: z
+        .array(
+          z.object({
+            title: z.string(),
+            metric: z.string().optional(),
+            context: z.string().optional(),
+            approach: z.string().optional(),
+            result: z.string().optional(),
+          }),
+        )
+        .default([]),
 
       showInTimeline: z.boolean().default(true),
       projects: z.array(reference('project')).default([]),
