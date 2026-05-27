@@ -9,7 +9,7 @@ import { ADMIN_DIR, serveFile } from './http.ts';
 
 const STATIC_TYPES: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
-  '.js':  'application/javascript; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
   '.map': 'application/json; charset=utf-8',
 };
 
