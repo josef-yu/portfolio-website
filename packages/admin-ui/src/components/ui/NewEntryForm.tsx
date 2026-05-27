@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { slugify } from '../../utils/text';
+import { slugify } from '@admin/utils/text';
 
 interface NewEntryFormProps {
   label: string;

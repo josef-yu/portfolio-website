@@ -1,4 +1,4 @@
-import type { CollectionMeta, Entry } from '../../types';
+import type { CollectionMeta, Entry } from '@admin/types';
 
 interface CollectionItemProps {
   col: CollectionMeta;

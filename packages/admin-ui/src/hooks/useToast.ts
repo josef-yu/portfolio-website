@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import type { ToastState } from '../types';
+import type { ToastState } from '@admin/types';
 
 export function useToast() {
   const [toast, setToast] = useState<ToastState>(null);

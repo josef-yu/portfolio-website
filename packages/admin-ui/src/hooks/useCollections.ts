@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api';
-import type { CollectionMeta } from '../types';
+import { api } from '@admin/api';
+import type { CollectionMeta } from '@admin/types';
 
 export function useCollections() {
   const [collections, setCollections] = useState<CollectionMeta[]>([]);

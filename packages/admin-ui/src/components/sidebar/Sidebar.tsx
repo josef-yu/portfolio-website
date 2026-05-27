@@ -1,4 +1,4 @@
-import type { CollectionMeta, Entry } from '../../types';
+import type { CollectionMeta, Entry } from '@admin/types';
 import CollectionItem from './CollectionItem';
 
 interface SidebarProps {
@@ -25,7 +25,7 @@ export default function Sidebar({
   return (
     <aside className="sidebar">
       <div className="sidebar-top">
-        <span className="brand">◆ Content</span>
+        <span className="brand">Content</span>
       </div>
 
       <div className="coll-list">

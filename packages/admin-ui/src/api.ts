@@ -24,4 +24,17 @@ export const api = {
     apiFetch<{ ok?: boolean; error?: string }>('POST', `/entry?c=${c}&id=${id}`, { content }),
 
   getTags: (c: string) => apiFetch<string[]>('GET', `/tags?c=${c}`),
+
+  /**
+   * Uploads a media file for a specific entry.
+   * The file is stored at public/content-assets/{c}/{id}/{filename}
+   * and served publicly at /content-assets/{c}/{id}/{filename}.
+   *
+   * @param data - Base64-encoded file contents (no data-URI prefix)
+   */
+  uploadMedia: (c: string, id: string, filename: string, data: string) =>
+    apiFetch<{ url?: string; error?: string }>('POST', `/upload?c=${c}&id=${id}`, {
+      filename,
+      data,
+    }),
 };

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { api } from '../api';
-import type { Entry } from '../types';
+import { api } from '@admin/api';
+import type { Entry } from '@admin/types';
 
 export function useSidebar() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});

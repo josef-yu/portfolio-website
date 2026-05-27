@@ -1,4 +1,4 @@
-import type { WritingMetaState } from '../types';
+import type { WritingMetaState } from '@admin/types';
 import { today } from './date';
 
 // ── Raw content splitting ──────────────────────────────────────────────────────

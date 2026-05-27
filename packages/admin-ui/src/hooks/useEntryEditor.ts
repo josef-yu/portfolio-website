@@ -1,14 +1,14 @@
 import { useState, useRef } from 'react';
-import { api } from '../api';
+import { api } from '@admin/api';
 import {
   parseFm,
   buildWritingFm,
   splitFrontmatter,
   DEFAULT_WRITING_META,
-} from '../utils/frontmatter';
-import { calcReadMin } from '../utils/text';
-import { today } from '../utils/date';
-import type { CollectionMeta, Pane, WritingMetaState } from '../types';
+} from '@admin/utils/frontmatter';
+import { calcReadMin } from '@admin/utils/text';
+import { today } from '@admin/utils/date';
+import type { CollectionMeta, Pane, WritingMetaState } from '@admin/types';
 
 interface Options {
   getCollection: (id: string) => CollectionMeta | undefined;
@@ -128,6 +128,11 @@ export function useEntryEditor({
       if (!finalMeta.draft && !finalMeta.pubDateOverride) {
         finalMeta = { ...finalMeta, pubDate: today() };
         setWritingMeta(finalMeta);
+      }
+      // Resolve auto read time to a concrete value at save time without
+      // touching state (so the UI "auto" badge remains until the user overrides).
+      if (finalMeta.readMinAuto) {
+        finalMeta = { ...finalMeta, readMinAuto: false, readMin: calcReadMin(bodyContent) };
       }
       fm = buildWritingFm(finalMeta);
     }
