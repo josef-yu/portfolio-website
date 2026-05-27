@@ -16,7 +16,7 @@ export default function App() {
   const { collections, getCollection } = useCollections();
   const { expanded, cachedEntries, toggleCollection, refreshCollection } = useSidebar();
   const { toast, showToast } = useToast();
-  const { preview, previewSrc, refreshPreview, togglePreview } = usePreview(getCollection);
+  const { preview, previewData, refreshPreview, togglePreview } = usePreview(getCollection);
 
   const editor = useEntryEditor({
     getCollection,
@@ -77,12 +77,13 @@ export default function App() {
         {editor.pane === 'editor' && (
           <EditorPane
             activeCollection={editor.activeCollection}
+            activeId={editor.activeId}
             fmContent={editor.fmContent}
             bodyContent={editor.bodyContent}
             writingMeta={editor.writingMeta}
             availableTags={editor.availableTags}
             preview={preview}
-            previewSrc={previewSrc}
+            previewData={previewData}
             onFmChange={editor.onFmChange}
             onBodyChange={editor.onBodyChange}
             onWritingMetaChange={editor.onWritingMetaChange}

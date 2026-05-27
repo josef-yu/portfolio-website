@@ -1,4 +1,4 @@
-import type { Pane } from '../types';
+import type { Pane } from '@admin/types';
 
 interface ToolbarProps {
   pane: Pane;

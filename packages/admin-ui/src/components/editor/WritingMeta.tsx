@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
-import { calcReadMin } from '../../utils/text';
-import { today } from '../../utils/date';
-import type { WritingMetaState } from '../../types';
+import { calcReadMin } from '@admin/utils/text';
+import { today } from '@admin/utils/date';
+import type { WritingMetaState } from '@admin/types';
 import TagInput from './TagInput';
 
 interface WritingMetaProps {
@@ -20,11 +19,11 @@ export default function WritingMeta({
   // Convenience patcher — merges a partial update into the current meta
   const set = (patch: Partial<WritingMetaState>) => onMetaChange({ ...meta, ...patch });
 
-  // Keep auto read time in sync as the body changes
-  useEffect(() => {
-    if (meta.readMinAuto) set({ readMin: calcReadMin(bodyContent) });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bodyContent, meta.readMinAuto]);
+  // Auto read time is a pure derived value: calculate it here for display.
+  // buildWritingFm already omits readMin from the frontmatter when readMinAuto
+  // is true, so we never need to push this back into state via onMetaChange —
+  // doing so would spuriously mark the entry dirty on every body keystroke.
+  const displayReadMin = meta.readMinAuto ? calcReadMin(bodyContent) : meta.readMin;
 
   const pubDateHint = meta.draft ? 'Set to today on first publish' : 'Will be set to today on save';
 
@@ -89,7 +88,7 @@ export default function WritingMeta({
             type="number"
             className="meta-num"
             min={1}
-            value={meta.readMin}
+            value={displayReadMin}
             onChange={(e) => {
               const readMin = Math.max(1, parseInt(e.target.value, 10) || 1);
               set({ readMinAuto: false, readMin });
