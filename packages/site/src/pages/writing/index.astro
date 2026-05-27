@@ -1,0 +1,108 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@site/layouts/BaseLayout.astro';
+import PostList from '@site/components/PostList.astro';
+
+const allPosts = (await getCollection('writing', ({ data }) => !data.draft))
+	.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+
+const allTags = ['All', ...Array.from(new Set(allPosts.flatMap((p) => p.data.tags)))];
+---
+
+<BaseLayout title="Writing · Joseph Yu" description="Things I figure out and wish I'd known earlier. Mostly backend, performance, and team process.">
+	<header class="wrap page-head">
+		<div class="crumbs">
+			<a href="/">Home</a>
+			<span class="sep">/</span>
+			<span>Writing</span>
+		</div>
+		<h1>Notes from the trenches.</h1>
+		<p class="sub">Things I figure out and wish I'd known earlier. Mostly backend, performance, and team process.</p>
+	</header>
+
+	<main class="wrap" style="padding-block: 32px 96px;">
+		{allPosts.length > 0 && <div class="filter-row" id="filter-row">
+			{allTags.map((tag) => (
+				<button class="tag filter-btn" data-tag={tag}>{tag}</button>
+			))}
+		</div>}
+
+		<PostList posts={allPosts} id="posts-list" emptyMessage="No posts published yet." />
+	</main>
+</BaseLayout>
+
+<script>
+	const row = document.getElementById('filter-row');
+	const list = document.getElementById('posts-list');
+
+	if (row && list) {
+		const buttons = row.querySelectorAll<HTMLButtonElement>('.filter-btn');
+		const rows = list.querySelectorAll<HTMLAnchorElement>('.post-row');
+
+		let active = 'All';
+
+		function apply() {
+			buttons.forEach((btn) => {
+				const selected = btn.dataset.tag === active;
+				btn.style.color = selected ? 'var(--surface)' : 'var(--ink-2)';
+				btn.style.background = selected ? 'var(--ink)' : 'var(--surface)';
+				btn.style.borderColor = selected ? 'var(--ink)' : 'var(--line)';
+			});
+			rows.forEach((r) => {
+				const tags = r.dataset.tags?.split(',') ?? [];
+				r.style.display = active === 'All' || tags.includes(active) ? '' : 'none';
+			});
+		}
+
+		buttons.forEach((btn) => {
+			btn.addEventListener('click', () => {
+				active = btn.dataset.tag ?? 'All';
+				apply();
+			});
+		});
+
+		// Init
+		apply();
+	}
+</script>
+
+<style>
+	/* ── Page header (base styles from global.css) ─────────────────────── */
+
+	/* ── Filter row ─────────────────────────────────────────────────────── */
+	.filter-row {
+		display: flex;
+		gap: 6px;
+		margin-bottom: 16px;
+		flex-wrap: wrap;
+	}
+
+	.filter-btn {
+		cursor: pointer;
+		border: none;
+		outline: none;
+		font-family: var(--font-mono);
+		font-size: 10.5px;
+		letter-spacing: 0.02em;
+		padding: 2px 8px;
+		border-radius: 999px;
+		border: 1px solid var(--line);
+		background: var(--surface);
+		color: var(--ink-2);
+		white-space: nowrap;
+		transition: background 0.15s, color 0.15s, border-color 0.15s;
+	}
+
+	.filter-btn:hover {
+		color: var(--ink);
+		border-color: color-mix(in oklab, var(--ink) 30%, var(--line));
+	}
+
+	/* ── Responsive ─────────────────────────────────────────────────────── */
+	@media (max-width: 560px) {
+		.page-head { padding-top: 32px; padding-bottom: 24px; }
+		.page-head .crumbs { font-size: 11px; margin-bottom: 16px; }
+		.page-head h1 { font-size: clamp(26px, 7vw, 34px); }
+		.page-head .sub { font-size: 14.5px; }
+	}
+</style>

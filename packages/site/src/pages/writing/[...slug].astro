@@ -1,0 +1,297 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '@site/layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+	const posts = (await getCollection('writing', ({ data }) => !data.draft))
+		.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+
+	return posts.map((post, idx) => ({
+		params: { slug: post.id },
+		props: {
+			post,
+			prev: idx > 0 ? posts[idx - 1] : null,
+			next: idx < posts.length - 1 ? posts[idx + 1] : null,
+		},
+	}));
+}
+
+const { post, prev, next } = Astro.props;
+const { Content } = await render(post);
+
+// Custom theme CSS requires HTTPS — giscus (on https://giscus.app) blocks
+// mixed content, so http://localhost won't work. Use built-in 'light' in dev.
+const giscusTheme = import.meta.env.PROD
+	? 'https://josefyu.com/giscus-theme.css'
+	: 'light';
+
+const dateStr = post.data.publishDate.toLocaleDateString('en-US', {
+	year: 'numeric',
+	month: 'short',
+	day: 'numeric',
+});
+---
+
+<BaseLayout title={`${post.data.title} — Joseph Yu`} description={post.data.description}>
+	<main class="wrap-tight reader">
+		<div class="crumbs">
+			<a href="/">Home</a>
+			<span class="sep">/</span>
+			<a href="/writing/">Writing</a>
+			{post.data.tags[0] && (
+				<>
+					<span class="sep">/</span>
+					<span class="tag-crumb">{post.data.tags[0]}</span>
+				</>
+			)}
+		</div>
+
+		<h1 class="r-title">{post.data.title}</h1>
+
+		<div class="r-meta">
+			<span>{dateStr}</span>
+			{post.data.readMin && <span>{post.data.readMin} min read</span>}
+			{post.data.tags[0] && <span>{post.data.tags[0]}</span>}
+		</div>
+
+		<div class="r-body">
+			<Content />
+		</div>
+
+		<div class="r-foot">
+			<span>
+				{prev
+					? <a href={`/writing/${prev.id}`}>← {prev.data.title}</a>
+					: <a class="dim" href="/writing/">← All writing</a>
+				}
+			</span>
+			<span>
+				{next
+					? <a href={`/writing/${next.id}`}>{next.data.title} →</a>
+					: <a class="dim" href="/writing/">All writing →</a>
+				}
+			</span>
+		</div>
+
+		<section class="comments">
+			<div class="comments-head">
+				<span class="label">Comments</span>
+				<span class="comments-by">
+					Powered by <a href="https://giscus.app" target="_blank" rel="noreferrer">giscus</a> · GitHub Discussions
+				</span>
+			</div>
+			<script src="https://giscus.app/client.js"
+				data-repo="josef-yu/portfolio-website"
+				data-repo-id="MDEwOlJlcG9zaXRvcnkzNjAyODcwNTI="
+				data-category="Announcements"
+				data-category-id="DIC_kwDOFXmLTM4C9p33"
+				data-mapping="pathname"
+				data-strict="0"
+				data-reactions-enabled="1"
+				data-emit-metadata="0"
+				data-input-position="top"
+				data-theme={giscusTheme}
+				data-lang="en"
+				crossorigin="anonymous"
+				async>
+			</script>
+		</section>
+	</main>
+</BaseLayout>
+
+<style>
+	/* ── Container ──────────────────────────────────────────────────────── */
+	.wrap-tight {
+		max-width: 760px;
+		margin: 0 auto;
+		padding-left: var(--pad-x);
+		padding-right: var(--pad-x);
+	}
+
+	/* ── Reader layout ──────────────────────────────────────────────────── */
+	.reader { padding-block: 56px 96px; }
+
+	.reader .crumbs {
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: var(--ink-3);
+		letter-spacing: 0.02em;
+		margin-bottom: 18px;
+		display: flex;
+		align-items: center;
+		gap: 0;
+	}
+
+	.reader .crumbs a { color: var(--ink-3); text-decoration: none; }
+	.reader .crumbs a:hover { color: var(--ink); }
+	.reader .crumbs .sep { margin: 0 8px; opacity: 0.5; }
+	.reader .crumbs .tag-crumb { color: var(--ink-2); }
+
+	.reader h1.r-title {
+		font-family: var(--font-sans);
+		font-weight: 500;
+		font-size: clamp(28px, 3.6vw, 40px);
+		letter-spacing: -0.02em;
+		line-height: 1.12;
+		margin: 0 0 16px;
+		color: var(--ink);
+		text-wrap: balance;
+	}
+
+	.reader .r-meta {
+		display: flex;
+		gap: 16px;
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: var(--ink-3);
+		letter-spacing: 0.02em;
+		padding-bottom: 32px;
+		border-bottom: 1px solid var(--line);
+		margin-bottom: 36px;
+		flex-wrap: wrap;
+	}
+
+	/* Body – prose rendered from markdown */
+	.reader .r-body :global(p) {
+		font-family: var(--font-serif);
+		font-size: 18px;
+		line-height: 1.7;
+		color: var(--ink);
+		margin-bottom: 22px;
+		text-wrap: pretty;
+	}
+
+	.reader .r-body :global(h2) {
+		font-family: var(--font-sans);
+		font-weight: 500;
+		font-size: 22px;
+		letter-spacing: -0.01em;
+		color: var(--ink);
+		margin: 2em 0 0.6em;
+	}
+
+	.reader .r-body :global(h3) {
+		font-family: var(--font-sans);
+		font-weight: 500;
+		font-size: 18px;
+		color: var(--ink);
+		margin: 1.6em 0 0.5em;
+	}
+
+	.reader .r-body :global(ul),
+	.reader .r-body :global(ol) {
+		font-family: var(--font-serif);
+		font-size: 18px;
+		line-height: 1.7;
+		padding-left: 1.4em;
+		margin-bottom: 1.2em;
+		color: var(--ink);
+	}
+
+	.reader .r-body :global(li) { margin-bottom: 0.4em; }
+
+	.reader .r-body :global(code) {
+		font-family: var(--font-mono);
+		font-size: 13.5px;
+		background: var(--surface);
+		border: 1px solid var(--line);
+		border-radius: var(--r-sm);
+		padding: 1px 5px;
+	}
+
+	.reader .r-body :global(pre) {
+		background: var(--ink);
+		color: var(--bg, #f5f0e8);
+		border-radius: var(--r-md);
+		padding: 20px 24px;
+		overflow-x: auto;
+		margin: 1.6em 0;
+	}
+
+	.reader .r-body :global(pre code) {
+		background: none;
+		border: none;
+		padding: 0;
+		font-size: 13.5px;
+		color: inherit;
+	}
+
+	.reader .r-body :global(blockquote) {
+		border-left: 3px solid var(--line);
+		padding-left: 1.2em;
+		margin: 1.6em 0;
+		color: var(--ink-3);
+		font-style: italic;
+	}
+
+	.reader .r-body :global(a) {
+		color: var(--accent);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	/* Footer – prev/next */
+	.reader .r-foot {
+		margin-top: 56px;
+		padding-top: 24px;
+		border-top: 1px solid var(--line);
+		display: flex;
+		justify-content: space-between;
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		color: var(--ink-3);
+		letter-spacing: 0.02em;
+		gap: 16px;
+	}
+
+	.reader .r-foot a { color: var(--ink-2); text-decoration: none; }
+	.reader .r-foot a:hover { color: var(--ink); }
+	.reader .r-foot a.dim { color: var(--ink-3); }
+
+	/* ── Comments ───────────────────────────────────────────────────────── */
+	.comments {
+		margin-top: 72px;
+		padding-top: 32px;
+		border-top: 1px solid var(--line);
+	}
+
+	.comments-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		margin-bottom: 24px;
+		gap: 16px;
+		flex-wrap: wrap;
+	}
+
+	.comments-head .label {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		color: var(--ink-2);
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	.comments-by {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		color: var(--ink-3);
+		letter-spacing: 0.02em;
+	}
+
+	.comments-by a {
+		color: var(--ink-2);
+		text-decoration: none;
+		border-bottom: 1px solid var(--line);
+	}
+
+
+	/* ── Responsive ─────────────────────────────────────────────────────── */
+	@media (max-width: 560px) {
+		.reader { padding-block: 32px 56px; }
+		.reader h1.r-title { font-size: clamp(24px, 7vw, 32px); }
+		.reader .r-meta { font-size: 11px; gap: 12px; padding-bottom: 22px; margin-bottom: 26px; }
+		.reader .r-body :global(p) { font-size: 16.5px; line-height: 1.65; }
+		.reader .r-foot { flex-direction: column; gap: 12px; }
+	}
+</style>

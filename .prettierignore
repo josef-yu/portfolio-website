@@ -1,0 +1,7 @@
+node_modules/
+packages/*/node_modules/
+packages/site/dist/
+packages/site/.astro/
+packages/site/src/integrations/admin-dist/
+.turbo/
+package-lock.json

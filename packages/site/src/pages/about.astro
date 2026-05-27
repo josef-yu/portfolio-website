@@ -1,0 +1,134 @@
+---
+import BaseLayout from '@site/layouts/BaseLayout.astro';
+import { getToolbelt } from '@site/utilities/getToolbelt';
+
+const skills = await getToolbelt('work');
+---
+
+<BaseLayout title="About · Joseph Yu" description="A backend engineer who likes the unglamorous parts.">
+	<header class="wrap page-head">
+		<div class="crumbs">
+			<a href="/">Home</a>
+			<span class="sep">/</span>
+			<span>About</span>
+		</div>
+		<h1>A backend engineer who likes the unglamorous parts.</h1>
+		<p class="sub">Senior backend engineer working on Python, Django, AWS infrastructure, and tax-compliance software for the Australian property funds sector.</p>
+	</header>
+
+	<main class="wrap" style="padding-block: 32px 96px;">
+		<div class="about-grid">
+			<div class="lbl">Profile</div>
+			<div>
+				<p>I lead an eight-person team building tax compliance software for the Australian property funds sector. The interesting parts of my work tend to be unglamorous: shaving 83% off an infrastructure bill, cutting a week of conformance testing down to thirty minutes, finding the loyalty abuse pattern that had been costing the business significant revenue. I write here when I figure something out that I wish I'd known earlier.</p>
+				<p>I came up through Java and Spring Boot, spent a freelance run on the Node/Next side of the stack, and have spent the last three years deepening into Python, Django, and the AWS surface area that compliance work actually touches. I care about systems that don't need a hero on call to survive their second year.</p>
+			</div>
+		</div>
+
+		<div class="about-grid">
+			<div class="lbl">Education</div>
+			<div>
+				<p style="margin-bottom: 4px;"><strong>Ateneo de Davao University</strong></p>
+				<p style="color: var(--ink-2); font-size: 14.5px;">Bachelor of Science in Computer Science<br />Davao City, Philippines</p>
+			</div>
+		</div>
+
+		<div class="about-grid">
+			<div class="lbl">Toolbelt</div>
+			<div class="skill-list">
+				{Object.entries(skills).map(([category, items]) => (
+					<div>
+						<div class="k">{category}</div>
+						<div class="v">
+							{items.map((item) => (
+								<span class="tag">{item}</span>
+							))}
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
+	</main>
+</BaseLayout>
+
+<style>
+	/* ── Page header (base styles from global.css) ─────────────────────── */
+
+	/* ── About grid ─────────────────────────────────────────────────────── */
+	.about-grid {
+		display: grid;
+		grid-template-columns: 200px 1fr;
+		gap: 40px;
+		padding: 24px 0;
+		border-top: 1px solid var(--line);
+	}
+
+	.about-grid:last-of-type { border-bottom: 1px solid var(--line); }
+
+	.about-grid .lbl {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--ink-3);
+	}
+
+	.about-grid p {
+		font-size: 16px;
+		color: var(--ink);
+		line-height: 1.65;
+		margin: 0 0 14px;
+		max-width: 640px;
+		text-wrap: pretty;
+	}
+
+	.about-grid p:last-child { margin-bottom: 0; }
+
+	/* ── Skill list ─────────────────────────────────────────────────────── */
+	.skill-list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.skill-list .k {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		color: var(--ink-3);
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		margin-bottom: 6px;
+	}
+
+	.skill-list .v {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+
+	/* ── Tag pill ───────────────────────────────────────────────────────── */
+	.tag {
+		font-family: var(--font-mono);
+		font-size: 10.5px;
+		letter-spacing: 0.02em;
+		padding: 2px 8px;
+		border-radius: 999px;
+		color: var(--ink-2);
+		border: 1px solid var(--line);
+		background: var(--surface);
+		white-space: nowrap;
+	}
+
+	/* ── Responsive ─────────────────────────────────────────────────────── */
+	@media (max-width: 820px) {
+		.about-grid { grid-template-columns: 1fr; gap: 12px; padding: 20px 0; }
+		.about-grid p { font-size: 15px; }
+	}
+
+	@media (max-width: 560px) {
+		.page-head { padding-top: 32px; padding-bottom: 24px; }
+		.page-head .crumbs { font-size: 11px; margin-bottom: 16px; }
+		.page-head h1 { font-size: clamp(26px, 7vw, 34px); }
+		.page-head .sub { font-size: 14.5px; }
+	}
+</style>

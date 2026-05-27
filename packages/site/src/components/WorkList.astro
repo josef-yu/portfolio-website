@@ -1,0 +1,49 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import WorkRow from '@site/components/WorkRow.astro';
+
+interface Props {
+	work: CollectionEntry<'work'>[];
+	compact?: boolean;
+	emptyMessage?: string;
+}
+
+const {
+	work,
+	compact = false,
+	emptyMessage = 'No work history yet.',
+} = Astro.props;
+---
+
+{work.length === 0 ? (
+	<p class="empty-notice">{emptyMessage}</p>
+) : (
+	<div class:list={['xp-list', { 'xp-list--compact': compact }]}>
+		{work.map((w) => (
+			<WorkRow
+				id={w.id}
+				role={w.data.role}
+				employer={w.data.employer}
+				org={w.data.org}
+				location={w.data.location}
+				startDate={w.data.startDate}
+				endDate={w.data.endDate}
+				summary={w.data.summary}
+				techStack={w.data.tech_stack}
+				compact={compact}
+			/>
+		))}
+	</div>
+)}
+
+<style>
+	.xp-list {
+		display: flex;
+		flex-direction: column;
+	}
+
+	/* Compact rows have border-bottom; the container needs the opening border-top */
+	.xp-list--compact {
+		border-top: 1px solid var(--line);
+	}
+</style>

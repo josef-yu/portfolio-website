@@ -1,0 +1,142 @@
+import { calcReadMin } from '@admin/utils/text';
+import { today } from '@admin/utils/date';
+import type { WritingMetaState } from '@admin/types';
+import TagInput from './TagInput';
+
+interface WritingMetaProps {
+  meta: WritingMetaState;
+  bodyContent: string;
+  availableTags: string[];
+  onMetaChange: (meta: WritingMetaState) => void;
+}
+
+export default function WritingMeta({
+  meta,
+  bodyContent,
+  availableTags,
+  onMetaChange,
+}: WritingMetaProps) {
+  // Convenience patcher — merges a partial update into the current meta
+  const set = (patch: Partial<WritingMetaState>) => onMetaChange({ ...meta, ...patch });
+
+  // Auto read time is a pure derived value: calculate it here for display.
+  // buildWritingFm already omits readMin from the frontmatter when readMinAuto
+  // is true, so we never need to push this back into state via onMetaChange —
+  // doing so would spuriously mark the entry dirty on every body keystroke.
+  const displayReadMin = meta.readMinAuto ? calcReadMin(bodyContent) : meta.readMin;
+
+  const pubDateHint = meta.draft ? 'Set to today on first publish' : 'Will be set to today on save';
+
+  return (
+    <>
+      {/* Title */}
+      <div className="field-group">
+        <span className="field-label">Title</span>
+        <input
+          type="text"
+          className="meta-input"
+          value={meta.title}
+          onChange={(e) => set({ title: e.target.value })}
+          spellCheck={false}
+          autoComplete="off"
+        />
+      </div>
+
+      {/* Description */}
+      <div className="field-group">
+        <span className="field-label">Description</span>
+        <textarea
+          className="meta-textarea"
+          value={meta.description}
+          onChange={(e) => set({ description: e.target.value })}
+          spellCheck={false}
+          rows={2}
+        />
+      </div>
+
+      {/* Draft toggle */}
+      <div className="field-group">
+        <span className="field-label">Status</span>
+        <label className="draft-label">
+          <input
+            type="checkbox"
+            checked={meta.draft}
+            onChange={(e) => set({ draft: e.target.checked })}
+          />
+          <span>Draft</span>
+        </label>
+      </div>
+
+      {/* Tags */}
+      <div className="field-group">
+        <span className="field-label">Tags</span>
+        <TagInput
+          tags={meta.tags}
+          availableTags={availableTags}
+          onChange={(tags) => set({ tags })}
+        />
+      </div>
+
+      {/* Read time */}
+      <div className="field-group">
+        <span className="field-label">
+          Read time
+          {meta.readMinAuto && <span className="auto-badge">auto</span>}
+        </span>
+        <div className="readmin-row">
+          <input
+            type="number"
+            className="meta-num"
+            min={1}
+            value={displayReadMin}
+            onChange={(e) => {
+              const readMin = Math.max(1, parseInt(e.target.value, 10) || 1);
+              set({ readMinAuto: false, readMin });
+            }}
+          />
+          <span className="hint">min</span>
+          {!meta.readMinAuto && (
+            <button
+              className="link-btn"
+              onClick={() => set({ readMinAuto: true, readMin: calcReadMin(bodyContent) })}
+            >
+              Reset to auto
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Publish date */}
+      <div className="field-group">
+        <span className="field-label">
+          Publish date
+          {!meta.pubDateOverride && (
+            <button
+              className="link-btn"
+              onClick={() => set({ pubDateOverride: true, pubDate: meta.pubDate || today() })}
+            >
+              Override
+            </button>
+          )}
+        </span>
+        {meta.pubDateOverride ? (
+          <div className="pubdate-row">
+            <input
+              type="date"
+              className="meta-input meta-date"
+              value={meta.pubDate}
+              onChange={(e) => set({ pubDate: e.target.value })}
+            />
+            <button className="link-btn" onClick={() => set({ pubDateOverride: false })}>
+              Remove override
+            </button>
+          </div>
+        ) : (
+          <span className="hint">{pubDateHint}</span>
+        )}
+      </div>
+
+      <div className="meta-divider" />
+    </>
+  );
+}
