@@ -19,12 +19,12 @@ export function sanitizeFilename(raw: string): string | null {
 // ── Static asset serving ──────────────────────────────────────────────────────
 
 const IMAGE_CONTENT_TYPES: Record<string, string> = {
-  '.png':  'image/png',
-  '.jpg':  'image/jpeg',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
-  '.gif':  'image/gif',
+  '.gif': 'image/gif',
   '.webp': 'image/webp',
-  '.svg':  'image/svg+xml',
+  '.svg': 'image/svg+xml',
   '.avif': 'image/avif',
 };
 
@@ -43,22 +43,34 @@ export async function serveContentAsset(
   const parts = rel.split('/');
 
   // Expect exactly: collection / id / filename
-  if (parts.length !== 3) { res.statusCode = 400; res.end(); return; }
+  if (parts.length !== 3) {
+    res.statusCode = 400;
+    res.end();
+    return;
+  }
 
   const [c, id, filename] = parts;
   if (!/^[a-zA-Z0-9_-]+$/.test(c) || !/^[a-zA-Z0-9_-]+$/.test(id)) {
-    res.statusCode = 400; res.end(); return;
+    res.statusCode = 400;
+    res.end();
+    return;
   }
 
   const safeFilename = sanitizeFilename(filename);
-  if (!safeFilename) { res.statusCode = 400; res.end(); return; }
+  if (!safeFilename) {
+    res.statusCode = 400;
+    res.end();
+    return;
+  }
 
   const filePath = path.join(publicDir, 'content-assets', c, id, safeFilename);
   let data: Buffer;
   try {
     data = await fs.readFile(filePath);
   } catch {
-    res.statusCode = 404; res.end(); return;
+    res.statusCode = 404;
+    res.end();
+    return;
   }
 
   const ext = path.extname(safeFilename).toLowerCase();

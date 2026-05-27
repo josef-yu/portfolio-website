@@ -43,10 +43,10 @@ const currentWork = allWork
 					<span>Read recent writing</span>
 					<span class="nf-suggest-path">/writing/ →</span>
 				</a>
-				<a href={`/work/${currentWork.id}`} class="nf-suggest-row">
+				{currentWork && <a href={`/work/${currentWork.id}`} class="nf-suggest-row">
 					<span>See current role at {currentWork.data.employer}</span>
 					<span class="nf-suggest-path">/work/{currentWork.id} →</span>
-				</a>
+				</a>}
 				<a href="/projects/" class="nf-suggest-row">
 					<span>Browse projects</span>
 					<span class="nf-suggest-path">/projects/ →</span>
