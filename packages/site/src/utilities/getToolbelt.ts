@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { type PillEntries } from '../content.config';
+import { type PillEntries } from '@site/content.config';
 
 // Ordered list of categories — controls display order on the about page
 const CATEGORY_ORDER = [

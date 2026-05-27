@@ -1,14 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+import BaseLayout from '@site/layouts/BaseLayout.astro';
+import PostList from '@site/components/PostList.astro';
 
 const allPosts = (await getCollection('writing', ({ data }) => !data.draft))
 	.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
 
 const allTags = ['All', ...Array.from(new Set(allPosts.flatMap((p) => p.data.tags)))];
-
-const fmtDate = (d: Date) =>
-	d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
 ---
 
 <BaseLayout title="Writing · Joseph Yu" description="Things I figure out and wish I'd known earlier. Mostly backend, performance, and team process.">
@@ -23,65 +21,49 @@ const fmtDate = (d: Date) =>
 	</header>
 
 	<main class="wrap" style="padding-block: 32px 96px;">
-		<div class="filter-row" id="filter-row">
+		{allPosts.length > 0 && <div class="filter-row" id="filter-row">
 			{allTags.map((tag) => (
 				<button class="tag filter-btn" data-tag={tag}>{tag}</button>
 			))}
-		</div>
+		</div>}
 
-		<div class="posts" id="posts-list">
-			{allPosts.map((post) => (
-				<a
-					class="post-row"
-					href={`/writing/${post.id}`}
-					data-tags={post.data.tags.join(',')}
-				>
-					<div class="date">{fmtDate(post.data.publishDate)}</div>
-					<div>
-						<h3 class="post-title">{post.data.title}</h3>
-						<div class="ex">{post.data.description}</div>
-					</div>
-					<div class="meta">
-						{post.data.tags[0] && <span>{post.data.tags[0]}</span>}
-						{post.data.readMin && <span>{post.data.readMin} min</span>}
-					</div>
-					<div class="arrow">→</div>
-				</a>
-			))}
-		</div>
+		<PostList posts={allPosts} id="posts-list" emptyMessage="No posts published yet." />
 	</main>
 </BaseLayout>
 
 <script>
-	const row = document.getElementById('filter-row')!;
-	const list = document.getElementById('posts-list')!;
-	const buttons = row.querySelectorAll<HTMLButtonElement>('.filter-btn');
-	const rows = list.querySelectorAll<HTMLAnchorElement>('.post-row');
+	const row = document.getElementById('filter-row');
+	const list = document.getElementById('posts-list');
 
-	let active = 'All';
+	if (row && list) {
+		const buttons = row.querySelectorAll<HTMLButtonElement>('.filter-btn');
+		const rows = list.querySelectorAll<HTMLAnchorElement>('.post-row');
 
-	function apply() {
+		let active = 'All';
+
+		function apply() {
+			buttons.forEach((btn) => {
+				const selected = btn.dataset.tag === active;
+				btn.style.color = selected ? 'var(--surface)' : 'var(--ink-2)';
+				btn.style.background = selected ? 'var(--ink)' : 'var(--surface)';
+				btn.style.borderColor = selected ? 'var(--ink)' : 'var(--line)';
+			});
+			rows.forEach((r) => {
+				const tags = r.dataset.tags?.split(',') ?? [];
+				r.style.display = active === 'All' || tags.includes(active) ? '' : 'none';
+			});
+		}
+
 		buttons.forEach((btn) => {
-			const selected = btn.dataset.tag === active;
-			btn.style.color = selected ? 'var(--surface)' : 'var(--ink-2)';
-			btn.style.background = selected ? 'var(--ink)' : 'var(--surface)';
-			btn.style.borderColor = selected ? 'var(--ink)' : 'var(--line)';
+			btn.addEventListener('click', () => {
+				active = btn.dataset.tag ?? 'All';
+				apply();
+			});
 		});
-		rows.forEach((r) => {
-			const tags = r.dataset.tags?.split(',') ?? [];
-			r.style.display = active === 'All' || tags.includes(active) ? '' : 'none';
-		});
+
+		// Init
+		apply();
 	}
-
-	buttons.forEach((btn) => {
-		btn.addEventListener('click', () => {
-			active = btn.dataset.tag ?? 'All';
-			apply();
-		});
-	});
-
-	// Init
-	apply();
 </script>
 
 <style>
@@ -116,87 +98,11 @@ const fmtDate = (d: Date) =>
 		border-color: color-mix(in oklab, var(--ink) 30%, var(--line));
 	}
 
-	/* ── Post list ──────────────────────────────────────────────────────── */
-	.posts {
-		border-top: 1px solid var(--line);
-	}
-
-	.post-row {
-		display: grid;
-		grid-template-columns: 110px 1fr 160px 32px;
-		gap: 24px;
-		padding: 18px 0;
-		border-bottom: 1px solid var(--line);
-		align-items: baseline;
-		text-decoration: none;
-		color: inherit;
-		transition: background-color 0.18s, padding 0.18s;
-	}
-
-	.post-row:hover { padding-left: 10px; padding-right: 10px; }
-
-	.post-row .date {
-		font-family: var(--font-mono);
-		font-size: 11.5px;
-		color: var(--ink-3);
-		letter-spacing: 0.02em;
-	}
-
-	.post-row h3.post-title {
-		font-family: var(--font-sans);
-		font-weight: 500;
-		font-size: 16.5px;
-		letter-spacing: -0.012em;
-		margin: 0 0 4px;
-		line-height: 1.3;
-		color: var(--ink);
-	}
-
-	.post-row .ex {
-		font-size: 13.5px;
-		color: var(--ink-2);
-		line-height: 1.5;
-		max-width: 540px;
-		text-wrap: pretty;
-	}
-
-	.post-row .meta {
-		font-family: var(--font-mono);
-		font-size: 11px;
-		color: var(--ink-3);
-		letter-spacing: 0.04em;
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
-		text-transform: uppercase;
-	}
-
-	.post-row .arrow {
-		font-family: var(--font-mono);
-		font-size: 14px;
-		color: var(--ink-3);
-		transition: transform 0.2s, color 0.2s;
-	}
-
-	.post-row:hover .arrow { color: var(--ink); transform: translateX(3px); }
-
 	/* ── Responsive ─────────────────────────────────────────────────────── */
-	@media (max-width: 820px) {
-		.post-row { grid-template-columns: 90px 1fr; gap: 14px; padding: 16px 0; }
-		.post-row:hover { padding-left: 6px; padding-right: 6px; }
-		.post-row .meta, .post-row .arrow { display: none; }
-	}
-
 	@media (max-width: 560px) {
 		.page-head { padding-top: 32px; padding-bottom: 24px; }
 		.page-head .crumbs { font-size: 11px; margin-bottom: 16px; }
 		.page-head h1 { font-size: clamp(26px, 7vw, 34px); }
 		.page-head .sub { font-size: 14.5px; }
-
-		.post-row { grid-template-columns: 1fr; gap: 4px; padding: 14px 0; }
-		.post-row:hover { padding-left: 0; padding-right: 0; }
-		.post-row .date { font-size: 11px; }
-		.post-row h3.post-title { font-size: 16px; }
-		.post-row .ex { font-size: 13px; }
 	}
 </style>

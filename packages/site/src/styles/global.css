@@ -297,6 +297,19 @@ section {
   margin-bottom: 0;
 }
 
+/* ── Empty state ──────────────────────────────────────────────────────────── */
+.empty-notice {
+  padding: 48px 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   :root {

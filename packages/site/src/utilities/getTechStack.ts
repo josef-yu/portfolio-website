@@ -1,6 +1,6 @@
 import { getCollection } from 'astro:content';
 
-import { type PillEntries } from '../content.config';
+import { type PillEntries } from '@site/content.config';
 import { getTimeDiff } from './getTimeDiff';
 
 export type TechStack = PillEntries[0] & {

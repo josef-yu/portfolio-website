@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import PostRow from '@site/components/PostRow.astro';
+
+interface Props {
+	posts: CollectionEntry<'writing'>[];
+	id?: string;
+	emptyMessage?: string;
+}
+
+const { posts, id, emptyMessage = 'No posts yet.' } = Astro.props;
+---
+
+{posts.length === 0 ? (
+	<p class="empty-notice">{emptyMessage}</p>
+) : (
+	<div class="posts" id={id}>
+		{posts.map((post) => (
+			<PostRow
+				id={post.id}
+				title={post.data.title}
+				description={post.data.description}
+				publishDate={post.data.publishDate}
+				tags={post.data.tags}
+				readMin={post.data.readMin}
+			/>
+		))}
+	</div>
+)}
+
+<style>
+	.posts {
+		border-top: 1px solid var(--line);
+	}
+</style>
