@@ -13,5 +13,8 @@
     "astro": "^5.15.2",
     "astro-tooltips": "^0.6.2",
     "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1"
   }
 }

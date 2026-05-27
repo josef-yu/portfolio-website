@@ -16,15 +16,20 @@
     "site:build": "npm run build -w packages/site",
     "lint": "eslint packages",
     "format": "prettier --write \"packages/**/*.{ts,tsx,js,mjs,css,json}\" \"*.{js,json}\"",
-    "format:check": "prettier --check \"packages/**/*.{ts,tsx,js,mjs,css,json}\" \"*.{js,json}\""
+    "format:check": "prettier --check \"packages/**/*.{ts,tsx,js,mjs,css,json}\" \"*.{js,json}\"",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.2",
     "eslint": "^10.4.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
     "prettier": "^3.8.3",
     "turbo": "^2.0.0",
-    "typescript-eslint": "^8.59.4"
+    "typescript-eslint": "^8.59.4",
+    "vitest": "^4.1.7"
   }
 }

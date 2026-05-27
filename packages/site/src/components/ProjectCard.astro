@@ -1,0 +1,101 @@
+---
+interface Props {
+	id: string;
+	title: string;
+	description: string;
+	tag: string;
+	year: string;
+	techStack: Array<{ name: string }>;
+	role?: string | null;
+}
+
+const { id, title, description, tag, year, techStack, role } = Astro.props;
+---
+
+<a class="proj" href={`/projects/${id}`}>
+	<div class="proj-head">
+		<span>{tag}</span>
+		<span>{year}</span>
+	</div>
+	<h3 class="proj-name">{title}</h3>
+	<p class="proj-sum">{description}</p>
+	<div class="proj-foot">
+		<div class="proj-stack">
+			{techStack.slice(0, 4).map((t) => (
+				<span>{t.name}</span>
+			))}
+		</div>
+		{role && <span class="proj-role">{role}</span>}
+	</div>
+</a>
+
+<style>
+	.proj {
+		background: var(--surface);
+		padding: 22px 22px 24px;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		min-height: 180px;
+		transition: background-color 0.2s ease;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.proj:hover { background: color-mix(in oklab, var(--surface) 96%, var(--ink-2)); }
+
+	.proj-head {
+		display: flex;
+		justify-content: space-between;
+		font-family: var(--font-mono);
+		font-size: 10.5px;
+		color: var(--ink-3);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+
+	.proj-name {
+		font-family: var(--font-sans);
+		font-weight: 500;
+		font-size: 18px;
+		letter-spacing: -0.012em;
+		margin: 0;
+		color: var(--ink);
+	}
+
+	.proj-sum {
+		color: var(--ink-2);
+		font-size: 14px;
+		line-height: 1.55;
+		flex: 1;
+		text-wrap: pretty;
+		margin: 0;
+	}
+
+	.proj-foot {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-family: var(--font-mono);
+		font-size: 11px;
+		color: var(--ink-3);
+		letter-spacing: 0.02em;
+		margin-top: 6px;
+		gap: 12px;
+	}
+
+	.proj-stack {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 12px;
+	}
+
+	.proj-stack span { white-space: nowrap; }
+
+	.proj-role { white-space: nowrap; }
+
+	@media (max-width: 560px) {
+		.proj { padding: 18px 16px 20px; min-height: 0; }
+		.proj-name { font-size: 17px; }
+	}
+</style>
