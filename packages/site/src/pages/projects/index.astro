@@ -1,0 +1,92 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@site/layouts/BaseLayout.astro';
+import ProjectGrid from '@site/components/ProjectGrid.astro';
+
+const allWork = await getCollection('work');
+const allProjects = await getCollection('project');
+
+const projects = allProjects
+	.map((project) => {
+		const relatedWork = allWork.filter((w) =>
+			w.data.projects.some((ref) => ref.id === project.id),
+		);
+
+		const sortedByRecent = [...relatedWork].sort(
+			(a, b) =>
+				(b.data.endDate?.valueOf() ?? Date.now()) -
+				(a.data.endDate?.valueOf() ?? Date.now()),
+		);
+		const earliest = [...relatedWork].sort(
+			(a, b) => a.data.startDate.valueOf() - b.data.startDate.valueOf(),
+		)[0];
+
+		const mostRecent = sortedByRecent[0];
+		const displayDate = mostRecent
+			? (mostRecent.data.endDate ?? new Date())
+			: project.data.date!;
+
+		const isActive = relatedWork.some((w) => !w.data.endDate);
+		const startYear =
+			earliest?.data.startDate.getFullYear() ??
+			project.data.date?.getFullYear();
+		const endYear = mostRecent?.data.endDate?.getFullYear();
+
+		const yearDisplay = isActive
+			? `${startYear}—`
+			: endYear
+				? String(endYear)
+				: String(startYear ?? '');
+
+		const role = mostRecent?.data.role ?? null;
+
+		return { project, displayDate, yearDisplay, role };
+	})
+	.sort((a, b) => b.displayDate.valueOf() - a.displayDate.valueOf());
+
+const displayProjects = projects.map(({ project, yearDisplay, role }) => ({
+	id: project.id,
+	title: project.data.title,
+	description: project.data.description,
+	tag: project.data.tags[0],
+	year: yearDisplay,
+	techStack: project.data.tech_stack,
+	role,
+}));
+---
+
+<BaseLayout
+	title="Projects — Joseph Yu"
+	description="A non-exhaustive list of projects I've led or contributed to."
+>
+	<main>
+		<header class="wrap page-head">
+			<div class="crumbs">
+				<a href="/">Home</a>
+				<span class="sep">/</span>
+				<span>Projects</span>
+			</div>
+			<h1>Things I've shipped.</h1>
+			<p class="sub">A non-exhaustive list of projects I've led or contributed to. Most live behind NDAs, so descriptions are deliberately vague.</p>
+		</header>
+
+		<div class="wrap main-content">
+			<ProjectGrid projects={displayProjects} />
+		</div>
+	</main>
+</BaseLayout>
+
+<style>
+	/* ── Main content ───────────────────────────────────────────────────── */
+	.main-content {
+		padding-block: 48px 96px;
+	}
+
+	/* ── Responsive ─────────────────────────────────────────────────────── */
+	@media (max-width: 560px) {
+		.page-head h1 { font-size: clamp(26px, 7vw, 34px); }
+		.page-head .sub { font-size: 14.5px; }
+		.page-head .crumbs { font-size: 11px; }
+		.main-content { padding-block: 32px 64px; }
+	}
+</style>
