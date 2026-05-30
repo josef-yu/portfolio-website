@@ -11,10 +11,14 @@ import yaml
 
 # ── Personal constants ────────────────────────────────────────────────────────
 HEADER = {
-    'name':              'Joseph Yu',
-    'contact_prefix':    'Davao, Philippines | +63 977 344 9488 | joseph@josefyu.com | ',
-    'contact_link_text': 'linkedin.com/in/josefyu',
-    'contact_link_url':  'https://linkedin.com/in/josefyu',
+    'name':    'Joseph Yu',
+    'contact': [
+        {'text': 'Davao, Philippines'},
+        {'text': '+63 977 344 9488'},
+        {'text': 'joseph@josefyu.com'},
+        {'text': 'linkedin.com/in/josefyu', 'url': 'https://linkedin.com/in/josefyu'},
+        {'text': 'github.com/josef-yu',     'url': 'https://github.com/josef-yu'},
+    ],
 }
 
 EDUCATION = [
