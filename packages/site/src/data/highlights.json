@@ -1,1 +1,6 @@
-[]
+[
+  { "stat": "83%", "label": "DevOps cost reduction in one year" },
+  { "stat": "30 min", "label": "ATO conformance testing, down from a week" },
+  { "stat": "60-90%", "label": "Query & workflow performance gains" },
+  { "stat": "₱2M+", "label": "Saved by finding one loyalty-abuse pattern" }
+]
