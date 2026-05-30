@@ -33,11 +33,15 @@ The site is served at `http://localhost:4321`. The admin panel is accessible at 
 
 ## Claude commands
 
-| Command                    | What it does                                                              |
-| -------------------------- | ------------------------------------------------------------------------- |
-| `/generate-cv`             | Generate `cv-joseph-yu.pdf` from work content                             |
-| `/generate-cv <url>`       | Tailored CV — fetches the job posting and filters bullets/skills to match |
-| `/generate-cv --interview` | Tailored CV — interviews you about the role when no URL is available      |
+| Command                                   | What it does                                                              |
+| ----------------------------------------- | ------------------------------------------------------------------------- |
+| `/generate-cv`                            | Generate `cv-joseph-yu.pdf` from work content                             |
+| `/generate-cv <url>`                      | Tailored CV — fetches the job posting and filters bullets/skills to match |
+| `/generate-cv --interview`                | Tailored CV — interviews you about the role when no URL is available      |
+| `/generate-cv <url> --cover-letter`       | Tailored CV + cover letter PDF for the given job posting                  |
+| `/generate-cv --interview --cover-letter` | Tailored CV + cover letter PDF based on interview answers                 |
+| `/generate-cover-letter`                  | Standalone cover letter — interviews you for job details                  |
+| `/generate-cover-letter <url>`            | Standalone cover letter from a job posting URL                            |
 
 Output is written to `cv-output/` (git-ignored). Standard mode writes to `cv-output/generic/`; tailored modes write to `cv-output/<company>-<role>/`, one subfolder per job.
 
