@@ -140,19 +140,20 @@ def main():
     c.drawString(ML, pdf.y, header['name'])
     pdf.y -= 20
 
-    contact_prefix    = header['contact_prefix']
-    contact_link_text = header['contact_link_text']
-    contact_link_url  = header['contact_link_url']
     contact_y = pdf.y
     c.setFont('Helvetica', 10)
-    c.drawString(ML, contact_y, contact_prefix + contact_link_text)
-    prefix_w = stringWidth(contact_prefix,    'Helvetica', 10)
-    link_w   = stringWidth(contact_link_text, 'Helvetica', 10)
-    c.linkURL(
-        contact_link_url,
-        (ML + prefix_w, contact_y - 2, ML + prefix_w + link_w, contact_y + 8),
-        relative=0,
-    )
+    x = ML
+    for i, item in enumerate(header['contact']):
+        prefix = '' if i == 0 else ' | '
+        if prefix:
+            c.drawString(x, contact_y, prefix)
+            x += stringWidth(prefix, 'Helvetica', 10)
+        text = item['text']
+        c.drawString(x, contact_y, text)
+        if 'url' in item:
+            w = stringWidth(text, 'Helvetica', 10)
+            c.linkURL(item['url'], (x, contact_y - 2, x + w, contact_y + 8), relative=0)
+        x += stringWidth(text, 'Helvetica', 10)
     pdf.y -= 10 * 1.2 + 4
     pdf.rule()
     pdf.y -= 14
