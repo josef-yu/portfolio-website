@@ -31,6 +31,18 @@ The site is served at `http://localhost:4321`. The admin panel is accessible at 
 | `npm run format`    | Prettier across all packages                      |
 | `npm run test`      | Run Vitest                                        |
 
+## Claude commands
+
+| Command                    | What it does                                                              |
+| -------------------------- | ------------------------------------------------------------------------- |
+| `/generate-cv`             | Generate `cv-joseph-yu.pdf` from work content                             |
+| `/generate-cv <url>`       | Tailored CV — fetches the job posting and filters bullets/skills to match |
+| `/generate-cv --interview` | Tailored CV — interviews you about the role when no URL is available      |
+
+Output is written to `cv-output/` (git-ignored). Standard mode writes to `cv-output/generic/`; tailored modes write to `cv-output/<company>-<role>/`, one subfolder per job.
+
+Requires Python 3 with `pip install -r .claude/requirements.txt`.
+
 ## Features
 
 ### Site
