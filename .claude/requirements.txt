@@ -1,0 +1,12 @@
+# CV generation scripts: reportlab + PyYAML (and reportlab's transitive deps)
+# Hashes are for macOS arm64 / Python 3.13 wheels — regenerate for other platforms.
+# Usage: pip install -r .claude/requirements.txt
+
+reportlab==4.5.1 \
+    --hash=sha256:06fce8cb56c83307cfa4909cdf4e6a2ddbb44e5d6ef4d2edca896d7e9769f091
+PyYAML==6.0.2 \
+    --hash=sha256:50187695423ffe49e2deacb8cd10510bc361faac997de9efef88badc3bb9e2d1
+pillow==12.2.0 \
+    --hash=sha256:56b25336f502b6ed02e889f4ece894a72612fe885889a6e8c4c80239ff6e5f5f
+charset-normalizer==3.4.7 \
+    --hash=sha256:f496c9c3cc02230093d8330875c4c3cdfc3b73612a5fd921c65d39cbcef08063

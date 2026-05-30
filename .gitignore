@@ -26,6 +26,9 @@ pnpm-debug.log*
 .env
 .env.production
 
+# CV output (generated files, one subfolder per run)
+cv-output/
+
 # macOS-specific files
 .DS_Store
 
