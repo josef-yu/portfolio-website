@@ -2,8 +2,8 @@
 """Render cv-joseph-yu.pdf from cv-data.json.
 
 Usage:
-    python3 .claude/render_cv_pdf.py              # reads cv-data.json from project root
-    python3 .claude/render_cv_pdf.py path/to.json # reads from specified file
+    python3 .claude/render_cv_pdf.py                              # reads from cv-output/generic/
+    python3 .claude/render_cv_pdf.py cv-output/<slug>/cv-data.json
 """
 
 import json
